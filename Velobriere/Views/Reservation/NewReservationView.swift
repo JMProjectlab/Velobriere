@@ -14,17 +14,10 @@ struct NewReservationView: View {
     @State private var customerEmail = ""
     @State private var notes = ""
     @State private var createdReservation: Reservation?
+    @State private var validationMessage: String?
 
     private var availableForSelectedRange: Int {
         reservationStore.availableUnits(for: bike, from: startDate, to: endDate)
-    }
-
-    private var isFormValid: Bool {
-        !customerName.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !customerPhone.trimmingCharacters(in: .whitespaces).isEmpty &&
-        endDate >= startDate &&
-        availableForSelectedRange > 0 &&
-        quantity <= availableForSelectedRange
     }
 
     var body: some View {
@@ -95,12 +88,22 @@ struct NewReservationView: View {
                 Button("Annuler") { dismiss() }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Confirmer") { submit() }
-                    .disabled(!isFormValid)
+                Button("Confirmer") { attemptSubmit() }
             }
         }
         .onChange(of: startDate) { _, _ in clampQuantity() }
         .onChange(of: endDate) { _, _ in clampQuantity() }
+        .alert(
+            "Impossible de confirmer",
+            isPresented: Binding(
+                get: { validationMessage != nil },
+                set: { if !$0 { validationMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(validationMessage ?? "")
+        }
     }
 
     private func card<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -123,6 +126,30 @@ struct NewReservationView: View {
     private func clampQuantity() {
         let available = availableForSelectedRange
         quantity = available > 0 ? min(quantity, available) : 1
+    }
+
+    private func attemptSubmit() {
+        var missingFields: [String] = []
+        if customerName.trimmingCharacters(in: .whitespaces).isEmpty { missingFields.append("votre nom") }
+        if customerPhone.trimmingCharacters(in: .whitespaces).isEmpty { missingFields.append("votre téléphone") }
+
+        let available = availableForSelectedRange
+        let hasAvailabilityIssue = endDate < startDate || available <= 0 || quantity > available
+
+        guard missingFields.isEmpty, !hasAvailabilityIssue else {
+            var message = ""
+            if !missingFields.isEmpty {
+                message += "Merci de renseigner \(missingFields.joined(separator: " et "))."
+            }
+            if hasAvailabilityIssue {
+                if !message.isEmpty { message += " " }
+                message += "Il ne reste pas assez de vélos disponibles sur la période choisie : ajustez les dates ou la quantité."
+            }
+            validationMessage = message
+            return
+        }
+
+        submit()
     }
 
     private func submit() {
