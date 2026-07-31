@@ -9,7 +9,9 @@ struct NewReservationView: View {
     @State private var startDate = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
     @State private var endDate = Calendar.current.startOfDay(for: .now).addingTimeInterval(2 * 86_400)
     @State private var quantity = 1
-    @State private var customerName = ""
+    @State private var customerFirstName = ""
+    @State private var customerLastName = ""
+    @State private var countryCode = CountryCodes.default.dial
     @State private var customerPhone = ""
     @State private var customerEmail = ""
     @State private var notes = ""
@@ -51,17 +53,36 @@ struct NewReservationView: View {
                 }
 
                 card(title: "Vos coordonnées") {
-                    TextField("Nom et prénom", text: $customerName)
-                        .textContentType(.name)
+                    TextField("Prénom", text: $customerFirstName)
+                        .textContentType(.givenName)
+                        .textInputAutocapitalization(.words)
                     Divider()
-                    TextField("Téléphone", text: $customerPhone)
-                        .keyboardType(.phonePad)
-                        .textContentType(.telephoneNumber)
+                    TextField("NOM", text: Binding(
+                        get: { customerLastName },
+                        set: { customerLastName = $0.uppercased() }
+                    ))
+                    .textContentType(.familyName)
+                    .textInputAutocapitalization(.characters)
                     Divider()
-                    TextField("E-mail (optionnel)", text: $customerEmail)
+                    HStack(spacing: Theme.Spacing.sm) {
+                        Picker("Indicatif", selection: $countryCode) {
+                            ForEach(CountryCodes.all) { country in
+                                Text("\(country.flag) \(country.dial)").tag(country.dial)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .fixedSize()
+
+                        TextField("Téléphone", text: $customerPhone)
+                            .keyboardType(.phonePad)
+                            .textContentType(.telephoneNumber)
+                    }
+                    Divider()
+                    TextField("E-mail", text: $customerEmail)
                         .keyboardType(.emailAddress)
                         .textContentType(.emailAddress)
-                        .autocapitalization(.none)
+                        .textInputAutocapitalization(.never)
                 }
 
                 card(title: "Remarques") {
@@ -130,8 +151,10 @@ struct NewReservationView: View {
 
     private func attemptSubmit() {
         var missingFields: [String] = []
-        if customerName.trimmingCharacters(in: .whitespaces).isEmpty { missingFields.append("votre nom") }
-        if customerPhone.trimmingCharacters(in: .whitespaces).isEmpty { missingFields.append("votre téléphone") }
+        if customerFirstName.trimmingCharacters(in: .whitespaces).isEmpty { missingFields.append("votre prénom") }
+        if customerLastName.trimmingCharacters(in: .whitespaces).isEmpty { missingFields.append("votre nom") }
+        if !isValidPhone(countryCode: countryCode, number: customerPhone) { missingFields.append("un numéro de téléphone valide") }
+        if !isValidEmail(customerEmail) { missingFields.append("une adresse e-mail valide") }
 
         let available = availableForSelectedRange
         let hasAvailabilityIssue = endDate < startDate || available <= 0 || quantity > available
@@ -139,7 +162,7 @@ struct NewReservationView: View {
         guard missingFields.isEmpty, !hasAvailabilityIssue else {
             var message = ""
             if !missingFields.isEmpty {
-                message += "Merci de renseigner \(missingFields.joined(separator: " et "))."
+                message += "Merci de renseigner \(listFormatted(missingFields))."
             }
             if hasAvailabilityIssue {
                 if !message.isEmpty { message += " " }
@@ -152,6 +175,26 @@ struct NewReservationView: View {
         submit()
     }
 
+    private func listFormatted(_ items: [String]) -> String {
+        guard let last = items.last else { return "" }
+        guard items.count > 1 else { return last }
+        return items.dropLast().joined(separator: ", ") + " et " + last
+    }
+
+    private func isValidEmail(_ email: String) -> Bool {
+        let pattern = #"^[A-Za-z0-9._%+-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$"#
+        return email.trimmingCharacters(in: .whitespaces).range(of: pattern, options: .regularExpression) != nil
+    }
+
+    private func isValidPhone(countryCode: String, number: String) -> Bool {
+        let digits = number.filter(\.isNumber)
+        guard !digits.isEmpty else { return false }
+        if countryCode == CountryCodes.default.dial {
+            return (digits.count == 10 && digits.hasPrefix("0")) || digits.count == 9
+        }
+        return (6...14).contains(digits.count)
+    }
+
     private func submit() {
         let reservation = Reservation(
             id: UUID(),
@@ -160,9 +203,11 @@ struct NewReservationView: View {
             startDate: startDate,
             endDate: endDate,
             quantity: quantity,
-            customerName: customerName,
-            customerPhone: customerPhone,
-            customerEmail: customerEmail,
+            customerFirstName: customerFirstName.trimmingCharacters(in: .whitespaces),
+            customerLastName: customerLastName.trimmingCharacters(in: .whitespaces).uppercased(),
+            customerCountryCode: countryCode,
+            customerPhone: customerPhone.trimmingCharacters(in: .whitespaces),
+            customerEmail: customerEmail.trimmingCharacters(in: .whitespaces),
             notes: notes,
             createdAt: .now,
             status: .pending

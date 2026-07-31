@@ -13,7 +13,9 @@ struct Reservation: Identifiable, Codable {
     var startDate: Date
     var endDate: Date
     var quantity: Int
-    var customerName: String
+    var customerFirstName: String
+    var customerLastName: String
+    var customerCountryCode: String
     var customerPhone: String
     var customerEmail: String
     var notes: String
