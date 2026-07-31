@@ -22,12 +22,39 @@ struct BikeDetailView: View {
                     Text(bike.tagline)
                         .font(Theme.Fonts.body(15))
                         .foregroundStyle(Theme.Colors.inkSoft)
-                    Text(bike.displayPrice)
-                        .font(Theme.Fonts.body(16, weight: .semibold))
-                        .foregroundStyle(Theme.Colors.primaryStrong)
-                        .padding(.top, Theme.Spacing.xs)
 
                     availabilityBadge
+                        .padding(.top, Theme.Spacing.xs)
+                }
+
+                VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+                    Text("TARIFS")
+                        .font(Theme.Fonts.body(12, weight: .semibold))
+                        .tracking(2)
+                        .foregroundStyle(Theme.Colors.sage)
+
+                    ForEach(bike.pricingOptions) { option in
+                        HStack {
+                            Text(option.label)
+                                .font(Theme.Fonts.body(14))
+                                .foregroundStyle(Theme.Colors.ink)
+                            Spacer()
+                            Text(option.displayPrice)
+                                .font(Theme.Fonts.body(14, weight: .semibold))
+                                .foregroundStyle(Theme.Colors.primaryStrong)
+                        }
+                        if option.id != bike.pricingOptions.last?.id {
+                            Divider()
+                        }
+                    }
+
+                    Text("Casque et antivol inclus dans toutes les locations.")
+                        .font(Theme.Fonts.body(12))
+                        .foregroundStyle(Theme.Colors.inkSoft)
+                        .padding(.top, Theme.Spacing.xs)
+                    Text("Livraison en option : +\(bike.deliveryFee.formatted(.currency(code: "EUR"))) (rayon \(bike.deliveryRadiusKm) km).")
+                        .font(Theme.Fonts.body(12))
+                        .foregroundStyle(Theme.Colors.inkSoft)
                 }
 
                 VStack(alignment: .leading, spacing: Theme.Spacing.sm) {

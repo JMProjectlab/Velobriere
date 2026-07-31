@@ -13,6 +13,10 @@ struct Reservation: Identifiable, Codable {
     var startDate: Date
     var endDate: Date
     var quantity: Int
+    var pricingLabel: String
+    var pricePerUnit: Double
+    var includesDelivery: Bool
+    var totalPrice: Double
     var customerFirstName: String
     var customerLastName: String
     var customerCountryCode: String

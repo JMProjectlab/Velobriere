@@ -30,7 +30,7 @@ struct BikeCardView: View {
                 .foregroundStyle(Theme.Colors.inkSoft)
 
             HStack(spacing: Theme.Spacing.sm) {
-                Text(bike.displayPrice)
+                Text(bike.startingPriceLabel)
                     .font(Theme.Fonts.body(14, weight: .semibold))
                     .foregroundStyle(Theme.Colors.primaryStrong)
 

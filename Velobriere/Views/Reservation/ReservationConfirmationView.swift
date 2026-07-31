@@ -27,6 +27,9 @@ struct ReservationConfirmationView: View {
                     .font(Theme.Fonts.body(14))
                     .foregroundStyle(Theme.Colors.inkSoft)
                     .multilineTextAlignment(.center)
+                Text("\(reservation.pricingLabel) · Total \(reservation.totalPrice.formatted(.currency(code: "EUR")))")
+                    .font(Theme.Fonts.body(14, weight: .semibold))
+                    .foregroundStyle(Theme.Colors.primaryStrong)
             }
             .padding(.horizontal, Theme.Spacing.lg)
 

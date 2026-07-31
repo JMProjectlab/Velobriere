@@ -9,6 +9,8 @@ struct NewReservationView: View {
     @State private var startDate = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
     @State private var endDate = Calendar.current.startOfDay(for: .now).addingTimeInterval(2 * 86_400)
     @State private var quantity = 1
+    @State private var selectedPricingOptionID: String
+    @State private var includesDelivery = false
     @State private var customerFirstName = ""
     @State private var customerLastName = ""
     @State private var countryCode = CountryCodes.default.dial
@@ -18,8 +20,22 @@ struct NewReservationView: View {
     @State private var createdReservation: Reservation?
     @State private var validationMessage: String?
 
+    init(bike: Bike) {
+        self.bike = bike
+        _selectedPricingOptionID = State(initialValue: bike.pricingOptions.first?.id ?? "")
+    }
+
     private var availableForSelectedRange: Int {
         reservationStore.availableUnits(for: bike, from: startDate, to: endDate)
+    }
+
+    private var selectedPricingOption: PricingOption? {
+        bike.pricingOptions.first(where: { $0.id == selectedPricingOptionID })
+    }
+
+    private var totalPrice: Double {
+        let base = (selectedPricingOption?.price ?? 0) * Double(quantity)
+        return base + (includesDelivery ? bike.deliveryFee : 0)
     }
 
     var body: some View {
@@ -36,6 +52,23 @@ struct NewReservationView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                 AvailabilityCalendarView(bike: bike, startDate: $startDate, endDate: $endDate)
+
+                card(title: "Formule") {
+                    Picker("Durée", selection: $selectedPricingOptionID) {
+                        ForEach(bike.pricingOptions) { option in
+                            Text(option.label).tag(option.id)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    Toggle(isOn: $includesDelivery) {
+                        Text("Livraison à domicile (+\(bike.deliveryFee.formatted(.currency(code: "EUR"))), rayon \(bike.deliveryRadiusKm) km)")
+                            .font(Theme.Fonts.body(13))
+                            .foregroundStyle(Theme.Colors.ink)
+                    }
+                    .tint(Theme.Colors.primary)
+                    .padding(.top, Theme.Spacing.xs)
+                }
 
                 card(title: "Nombre de vélos") {
                     Stepper(
@@ -91,12 +124,42 @@ struct NewReservationView: View {
                 }
 
                 card(title: "Résumé") {
-                    Text(bike.displayPrice)
-                        .font(Theme.Fonts.body(14, weight: .semibold))
-                        .foregroundStyle(Theme.Colors.primaryStrong)
+                    if let option = selectedPricingOption {
+                        HStack {
+                            Text("\(option.label) × \(quantity)")
+                                .font(Theme.Fonts.body(14))
+                                .foregroundStyle(Theme.Colors.ink)
+                            Spacer()
+                            Text((option.price * Double(quantity)).formatted(.currency(code: "EUR")))
+                                .font(Theme.Fonts.body(14))
+                                .foregroundStyle(Theme.Colors.ink)
+                        }
+                    }
+                    if includesDelivery {
+                        HStack {
+                            Text("Livraison")
+                                .font(Theme.Fonts.body(14))
+                                .foregroundStyle(Theme.Colors.ink)
+                            Spacer()
+                            Text(bike.deliveryFee.formatted(.currency(code: "EUR")))
+                                .font(Theme.Fonts.body(14))
+                                .foregroundStyle(Theme.Colors.ink)
+                        }
+                    }
+                    Divider()
+                    HStack {
+                        Text("Total")
+                            .font(Theme.Fonts.body(15, weight: .semibold))
+                            .foregroundStyle(Theme.Colors.ink)
+                        Spacer()
+                        Text(totalPrice.formatted(.currency(code: "EUR")))
+                            .font(Theme.Fonts.body(16, weight: .bold))
+                            .foregroundStyle(Theme.Colors.primaryStrong)
+                    }
                     Text("Cette demande est enregistrée sur votre appareil. Vélo Brière vous recontactera pour la confirmer.")
                         .font(Theme.Fonts.body(12))
                         .foregroundStyle(Theme.Colors.inkSoft)
+                        .padding(.top, Theme.Spacing.xs)
                 }
             }
             .padding(Theme.Spacing.md)
@@ -203,6 +266,10 @@ struct NewReservationView: View {
             startDate: startDate,
             endDate: endDate,
             quantity: quantity,
+            pricingLabel: selectedPricingOption?.label ?? "",
+            pricePerUnit: selectedPricingOption?.price ?? 0,
+            includesDelivery: includesDelivery,
+            totalPrice: totalPrice,
             customerFirstName: customerFirstName.trimmingCharacters(in: .whitespaces),
             customerLastName: customerLastName.trimmingCharacters(in: .whitespaces).uppercased(),
             customerCountryCode: countryCode,
