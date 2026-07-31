@@ -3,6 +3,8 @@ import SwiftUI
 struct BikeCardView: View {
     let bike: Bike
 
+    @EnvironmentObject private var reservationStore: ReservationStore
+
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             ZStack {
@@ -27,9 +29,23 @@ struct BikeCardView: View {
                 .font(Theme.Fonts.body(14))
                 .foregroundStyle(Theme.Colors.inkSoft)
 
-            Text(bike.displayPrice)
-                .font(Theme.Fonts.body(14, weight: .semibold))
-                .foregroundStyle(Theme.Colors.primaryStrong)
+            HStack(spacing: Theme.Spacing.sm) {
+                Text(bike.displayPrice)
+                    .font(Theme.Fonts.body(14, weight: .semibold))
+                    .foregroundStyle(Theme.Colors.primaryStrong)
+
+                Spacer()
+
+                let availableToday = reservationStore.availableUnits(for: bike, on: .now)
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(availableToday > 0 ? Theme.Colors.sage : Theme.Colors.warning)
+                        .frame(width: 6, height: 6)
+                    Text("\(availableToday)/\(bike.totalUnits) dispo.")
+                        .font(Theme.Fonts.body(12, weight: .semibold))
+                        .foregroundStyle(Theme.Colors.inkSoft)
+                }
+            }
         }
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.surface)

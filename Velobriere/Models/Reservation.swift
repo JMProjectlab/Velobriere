@@ -1,7 +1,7 @@
 import Foundation
 
 struct Reservation: Identifiable, Codable {
-    enum Status: String, Codable {
+    enum Status: String, Codable, Hashable {
         case pending
         case confirmed
         case cancelled

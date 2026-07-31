@@ -7,6 +7,7 @@ struct Bike: Identifiable, Hashable {
     let tagline: String
     let highlights: [String]
     let pricePerDay: Double?
+    let totalUnits: Int
     let productURL: URL?
     let imageSystemName: String
 

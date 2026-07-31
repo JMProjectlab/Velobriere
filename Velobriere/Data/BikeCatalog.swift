@@ -18,9 +18,11 @@ enum BikeCatalog {
             "Cadre bas, facile à enfourcher",
             "Assistance électrique pour rouler sans effort",
             "Confortable pour les balades autour de la Brière",
-            "Idéal pour découvrir marais, villages et chemins"
+            "Idéal pour découvrir marais, villages et chemins",
+            "Jusqu'à 4 vélos disponibles en simultané"
         ],
         pricePerDay: nil,
+        totalUnits: 4,
         productURL: URL(string: "https://www.decathlonpro.fr/e-actv-100-lf-c2-id-8983925.html"),
         imageSystemName: "bicycle"
     )

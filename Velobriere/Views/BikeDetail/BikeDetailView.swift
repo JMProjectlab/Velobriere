@@ -3,6 +3,7 @@ import SwiftUI
 struct BikeDetailView: View {
     let bike: Bike
 
+    @EnvironmentObject private var reservationStore: ReservationStore
     @State private var showsReservationSheet = false
 
     var body: some View {
@@ -25,6 +26,8 @@ struct BikeDetailView: View {
                         .font(Theme.Fonts.body(16, weight: .semibold))
                         .foregroundStyle(Theme.Colors.primaryStrong)
                         .padding(.top, Theme.Spacing.xs)
+
+                    availabilityBadge
                 }
 
                 VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
@@ -67,6 +70,18 @@ struct BikeDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showsReservationSheet) {
             NewReservationView(bike: bike)
+        }
+    }
+
+    private var availabilityBadge: some View {
+        let availableToday = reservationStore.availableUnits(for: bike, on: .now)
+        return HStack(spacing: 4) {
+            Circle()
+                .fill(availableToday > 0 ? Theme.Colors.sage : Theme.Colors.warning)
+                .frame(width: 6, height: 6)
+            Text("\(availableToday)/\(bike.totalUnits) disponibles aujourd'hui")
+                .font(Theme.Fonts.body(12, weight: .semibold))
+                .foregroundStyle(Theme.Colors.inkSoft)
         }
     }
 
