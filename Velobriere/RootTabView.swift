@@ -14,6 +14,11 @@ struct RootTabView: View {
                 .tabItem {
                     Label("Réservations", systemImage: "calendar")
                 }
+
+            LegalInfoView()
+                .tabItem {
+                    Label("Informations", systemImage: "info.circle")
+                }
         }
         .tint(Theme.Colors.primary)
         .environmentObject(reservationStore)

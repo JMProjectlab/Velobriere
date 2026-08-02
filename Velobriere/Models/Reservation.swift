@@ -24,5 +24,8 @@ struct Reservation: Identifiable, Codable {
     var customerEmail: String
     var notes: String
     var createdAt: Date
+    /// Horodatage de l'acceptation des conditions générales de location,
+    /// conservé comme preuve du consentement au contrat.
+    var acceptedTermsAt: Date?
     var status: Status
 }
