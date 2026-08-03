@@ -112,16 +112,14 @@ struct ReservationDetailView: View {
     }
 
     private func feeWarningCard(_ reservation: Reservation) -> some View {
-        let days = CancellationPolicy.daysUntilStart(reservation.startDate)
-        let fee = CancellationPolicy.fee(amount: reservation.totalPrice, startDate: reservation.startDate)
-        return HStack(alignment: .top, spacing: Theme.Spacing.sm) {
+        HStack(alignment: .top, spacing: Theme.Spacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(Theme.Colors.warning)
             VStack(alignment: .leading, spacing: 4) {
-                Text(days <= 0 ? "Votre location débute aujourd'hui" : "Départ dans \(days) jour\(days > 1 ? "s" : "")")
+                Text(CancellationPolicy.noticeTitle(startDate: reservation.startDate))
                     .font(Theme.Fonts.body(13, weight: .semibold))
                     .foregroundStyle(Theme.Colors.ink)
-                Text("Vous êtes dans la période de frais d'annulation : toute annulation entraîne une retenue de 50 %, soit \(fee.eur).")
+                Text(CancellationPolicy.noticeBody(amount: reservation.totalPrice, startDate: reservation.startDate))
                     .font(Theme.Fonts.body(12))
                     .foregroundStyle(Theme.Colors.ink)
                     .fixedSize(horizontal: false, vertical: true)
@@ -219,15 +217,25 @@ struct ReservationDetailView: View {
         let refund = CancellationPolicy.refund(amount: reservation.totalPrice, startDate: reservation.startDate)
 
         Task {
-            if refund > 0, let reference = reservation.paymentReference {
-                _ = try? await paymentService.refund(amount: refund, originalReference: reference)
+            var creditNoteNumber: String?
+            // Rien à rembourser (location commencée) : pas d'avoir à émettre.
+            if refund > 0 {
+                if let reference = reservation.paymentReference {
+                    _ = try? await paymentService.refund(amount: refund, originalReference: reference)
+                }
+                creditNoteNumber = invoiceStore.issueCreditNote(
+                    for: reservation,
+                    refundAmount: refund,
+                    feeAmount: fee
+                ).number
             }
-            let creditNote = invoiceStore.issueCreditNote(for: reservation, refundAmount: refund, feeAmount: fee)
-            reservationStore.cancel(reservation.id, fee: fee, refund: refund, creditNoteNumber: creditNote.number)
+            reservationStore.cancel(reservation.id, fee: fee, refund: refund, creditNoteNumber: creditNoteNumber)
             isCancelling = false
-            cancellationResultMessage = fee > 0
-                ? "Votre réservation est annulée. \(fee.eur) ont été retenus au titre des frais d'annulation ; \(refund.eur) vous sont remboursés. L'avoir \(creditNote.number) est disponible dans le détail de la réservation."
-                : "Votre réservation est annulée et intégralement remboursée (\(refund.eur)). L'avoir \(creditNote.number) est disponible dans le détail de la réservation."
+            cancellationResultMessage = CancellationPolicy.resultMessage(
+                fee: fee,
+                refund: refund,
+                creditNoteNumber: creditNoteNumber
+            )
         }
     }
 

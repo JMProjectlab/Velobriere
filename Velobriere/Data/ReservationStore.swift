@@ -19,8 +19,11 @@ final class ReservationStore: ObservableObject {
         save()
     }
 
-    func delete(at offsets: IndexSet) {
-        reservations.remove(atOffsets: offsets)
+    /// Retire une réservation de la liste. Réservé aux réservations déjà
+    /// annulées : une réservation payée doit passer par `cancel(_:)`, qui
+    /// applique les frais et émet l'avoir.
+    func remove(_ reservationID: UUID) {
+        reservations.removeAll { $0.id == reservationID }
         save()
     }
 

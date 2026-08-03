@@ -255,7 +255,12 @@ enum LegalContent {
                 id: "annulation",
                 heading: "8. Annulation et rétractation",
                 body: """
-                [À COMPLÉTER : conditions et délais d'annulation, et éventuelles retenues.]
+                Conditions appliquées par l'application :
+                • annulation à plus de 2 jours du départ : remboursement intégral ;
+                • annulation à 2 jours ou moins du départ, jour du départ inclus : 50 % du montant sont retenus ;
+                • location déjà commencée : aucun remboursement.
+
+                Le remboursement est effectué sur le moyen de paiement d'origine et donne lieu à l'émission d'un avoir.
 
                 ⚠️ Point à faire valider par un juriste : la réservation à distance ouvre en principe un droit de rétractation de 14 jours. Le Code de la consommation prévoit une exception pour les activités de loisirs devant être fournies à une date ou une période déterminée, susceptible de s'appliquer ici. Si l'exception s'applique, elle doit être expressément portée à la connaissance du client ; à défaut, le délai de rétractation peut être prolongé.
                 """
