@@ -9,13 +9,15 @@ struct MyReservationsView: View {
                 if reservationStore.reservations.isEmpty {
                     EmptyStateView(
                         title: "Aucune réservation",
-                        message: "Vos demandes de réservation apparaîtront ici une fois créées depuis la fiche d'un vélo.",
+                        message: "Vos réservations apparaîtront ici une fois payées depuis la fiche d'un vélo.",
                         systemImage: "calendar.badge.clock"
                     )
                 } else {
                     List {
                         ForEach(reservationStore.reservations) { reservation in
-                            ReservationRowView(reservation: reservation)
+                            NavigationLink(value: reservation.id) {
+                                ReservationRowView(reservation: reservation)
+                            }
                         }
                         .onDelete(perform: reservationStore.delete)
                     }
@@ -24,6 +26,12 @@ struct MyReservationsView: View {
             }
             .background(Theme.Colors.background)
             .navigationTitle("Mes réservations")
+            .navigationDestination(for: UUID.self) { id in
+                ReservationDetailView(reservationID: id)
+            }
+            .navigationDestination(for: Invoice.self) { invoice in
+                InvoiceDocumentView(invoice: invoice)
+            }
         }
     }
 }

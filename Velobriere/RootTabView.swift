@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootTabView: View {
     @StateObject private var reservationStore = ReservationStore()
+    @StateObject private var invoiceStore = InvoiceStore()
 
     var body: some View {
         TabView {
@@ -22,5 +23,6 @@ struct RootTabView: View {
         }
         .tint(Theme.Colors.primary)
         .environmentObject(reservationStore)
+        .environmentObject(invoiceStore)
     }
 }

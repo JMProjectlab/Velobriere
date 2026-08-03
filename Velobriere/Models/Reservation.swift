@@ -16,6 +16,7 @@ struct Reservation: Identifiable, Codable {
     var pricingLabel: String
     var pricePerUnit: Double
     var includesDelivery: Bool
+    var deliveryFee: Double
     var totalPrice: Double
     var customerFirstName: String
     var customerLastName: String
@@ -28,4 +29,25 @@ struct Reservation: Identifiable, Codable {
     /// conservé comme preuve du consentement au contrat.
     var acceptedTermsAt: Date?
     var status: Status
+
+    // MARK: - Paiement
+
+    var paymentStatus: PaymentStatus
+    var paymentMethod: PaymentMethod?
+    var paymentReference: String?
+    var paidAt: Date?
+    var invoiceNumber: String?
+
+    // MARK: - Annulation
+
+    var cancelledAt: Date?
+    /// Montant retenu au titre des frais d'annulation.
+    var cancellationFee: Double?
+    /// Montant effectivement remboursé au client.
+    var refundedAmount: Double?
+    var creditNoteNumber: String?
+
+    var customerFullName: String {
+        "\(customerFirstName) \(customerLastName)"
+    }
 }

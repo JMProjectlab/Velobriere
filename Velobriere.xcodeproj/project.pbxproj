@@ -7,30 +7,38 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		000000000000000000000028 /* VelobriereApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000022 /* VelobriereApp.swift */; };
-		000000000000000000000029 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000023 /* RootTabView.swift */; };
-		00000000000000000000002A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000001 /* Theme.swift */; };
-		00000000000000000000002B /* Bike.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000003 /* Bike.swift */; };
-		00000000000000000000002C /* Reservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000004 /* Reservation.swift */; };
-		00000000000000000000002D /* CountryCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000005 /* CountryCode.swift */; };
-		00000000000000000000002E /* PricingOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000006 /* PricingOption.swift */; };
-		00000000000000000000002F /* LegalDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000007 /* LegalDocument.swift */; };
-		000000000000000000000030 /* BikeCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000009 /* BikeCatalog.swift */; };
-		000000000000000000000031 /* ReservationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000A /* ReservationStore.swift */; };
-		000000000000000000000032 /* LegalContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000B /* LegalContent.swift */; };
-		000000000000000000000033 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000D /* PrimaryButton.swift */; };
-		000000000000000000000034 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000E /* EmptyStateView.swift */; };
-		000000000000000000000035 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000010 /* CatalogView.swift */; };
-		000000000000000000000036 /* BikeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000011 /* BikeCardView.swift */; };
-		000000000000000000000037 /* BikeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000013 /* BikeDetailView.swift */; };
-		000000000000000000000038 /* NewReservationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000015 /* NewReservationView.swift */; };
-		000000000000000000000039 /* ReservationConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000016 /* ReservationConfirmationView.swift */; };
-		00000000000000000000003A /* AvailabilityCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000017 /* AvailabilityCalendarView.swift */; };
-		00000000000000000000003B /* MyReservationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000019 /* MyReservationsView.swift */; };
-		00000000000000000000003C /* ReservationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001A /* ReservationRowView.swift */; };
-		00000000000000000000003D /* LegalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001C /* LegalInfoView.swift */; };
-		00000000000000000000003E /* LegalDocumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001D /* LegalDocumentView.swift */; };
-		00000000000000000000003F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000020 /* Assets.xcassets */; };
+		000000000000000000000031 /* VelobriereApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000002B /* VelobriereApp.swift */; };
+		000000000000000000000032 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000002C /* RootTabView.swift */; };
+		000000000000000000000033 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000001 /* Theme.swift */; };
+		000000000000000000000034 /* Bike.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000003 /* Bike.swift */; };
+		000000000000000000000035 /* Reservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000004 /* Reservation.swift */; };
+		000000000000000000000036 /* CountryCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000005 /* CountryCode.swift */; };
+		000000000000000000000037 /* PricingOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000006 /* PricingOption.swift */; };
+		000000000000000000000038 /* LegalDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000007 /* LegalDocument.swift */; };
+		000000000000000000000039 /* Payment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000008 /* Payment.swift */; };
+		00000000000000000000003A /* Invoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000009 /* Invoice.swift */; };
+		00000000000000000000003B /* CancellationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000A /* CancellationPolicy.swift */; };
+		00000000000000000000003C /* BikeCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000C /* BikeCatalog.swift */; };
+		00000000000000000000003D /* ReservationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000D /* ReservationStore.swift */; };
+		00000000000000000000003E /* LegalContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000E /* LegalContent.swift */; };
+		00000000000000000000003F /* PaymentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000000F /* PaymentService.swift */; };
+		000000000000000000000040 /* InvoiceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000010 /* InvoiceStore.swift */; };
+		000000000000000000000041 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000012 /* PrimaryButton.swift */; };
+		000000000000000000000042 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000013 /* EmptyStateView.swift */; };
+		000000000000000000000043 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000015 /* CatalogView.swift */; };
+		000000000000000000000044 /* BikeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000016 /* BikeCardView.swift */; };
+		000000000000000000000045 /* BikeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000018 /* BikeDetailView.swift */; };
+		000000000000000000000046 /* NewReservationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001A /* NewReservationView.swift */; };
+		000000000000000000000047 /* ReservationConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001B /* ReservationConfirmationView.swift */; };
+		000000000000000000000048 /* AvailabilityCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001C /* AvailabilityCalendarView.swift */; };
+		000000000000000000000049 /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001D /* CheckoutView.swift */; };
+		00000000000000000000004A /* MyReservationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000001F /* MyReservationsView.swift */; };
+		00000000000000000000004B /* ReservationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000020 /* ReservationRowView.swift */; };
+		00000000000000000000004C /* ReservationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000021 /* ReservationDetailView.swift */; };
+		00000000000000000000004D /* LegalInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000025 /* LegalInfoView.swift */; };
+		00000000000000000000004E /* LegalDocumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000026 /* LegalDocumentView.swift */; };
+		00000000000000000000004F /* InvoiceDocumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000023 /* InvoiceDocumentView.swift */; };
+		000000000000000000000050 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000029 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,29 +48,37 @@
 		000000000000000000000005 /* CountryCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/CountryCode.swift"; sourceTree = "<group>"; };
 		000000000000000000000006 /* PricingOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/PricingOption.swift"; sourceTree = "<group>"; };
 		000000000000000000000007 /* LegalDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/LegalDocument.swift"; sourceTree = "<group>"; };
-		000000000000000000000009 /* BikeCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data/BikeCatalog.swift"; sourceTree = "<group>"; };
-		00000000000000000000000A /* ReservationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data/ReservationStore.swift"; sourceTree = "<group>"; };
-		00000000000000000000000B /* LegalContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data/LegalContent.swift"; sourceTree = "<group>"; };
-		00000000000000000000000D /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Components/PrimaryButton.swift"; sourceTree = "<group>"; };
-		00000000000000000000000E /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Components/EmptyStateView.swift"; sourceTree = "<group>"; };
-		000000000000000000000010 /* CatalogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Catalog/CatalogView.swift"; sourceTree = "<group>"; };
-		000000000000000000000011 /* BikeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Catalog/BikeCardView.swift"; sourceTree = "<group>"; };
-		000000000000000000000013 /* BikeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/BikeDetail/BikeDetailView.swift"; sourceTree = "<group>"; };
-		000000000000000000000015 /* NewReservationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Reservation/NewReservationView.swift"; sourceTree = "<group>"; };
-		000000000000000000000016 /* ReservationConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Reservation/ReservationConfirmationView.swift"; sourceTree = "<group>"; };
-		000000000000000000000017 /* AvailabilityCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Reservation/AvailabilityCalendarView.swift"; sourceTree = "<group>"; };
-		000000000000000000000019 /* MyReservationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MyReservations/MyReservationsView.swift"; sourceTree = "<group>"; };
-		00000000000000000000001A /* ReservationRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MyReservations/ReservationRowView.swift"; sourceTree = "<group>"; };
-		00000000000000000000001C /* LegalInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Legal/LegalInfoView.swift"; sourceTree = "<group>"; };
-		00000000000000000000001D /* LegalDocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Legal/LegalDocumentView.swift"; sourceTree = "<group>"; };
-		000000000000000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Resources/Assets.xcassets"; sourceTree = "<group>"; };
-		000000000000000000000022 /* VelobriereApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VelobriereApp.swift"; sourceTree = "<group>"; };
-		000000000000000000000023 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootTabView.swift"; sourceTree = "<group>"; };
-		000000000000000000000025 /* Velobriere.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Velobriere.app"; sourceTree = "BUILT_PRODUCTS_DIR"; };
+		000000000000000000000008 /* Payment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Payment.swift"; sourceTree = "<group>"; };
+		000000000000000000000009 /* Invoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Invoice.swift"; sourceTree = "<group>"; };
+		00000000000000000000000A /* CancellationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/CancellationPolicy.swift"; sourceTree = "<group>"; };
+		00000000000000000000000C /* BikeCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data/BikeCatalog.swift"; sourceTree = "<group>"; };
+		00000000000000000000000D /* ReservationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data/ReservationStore.swift"; sourceTree = "<group>"; };
+		00000000000000000000000E /* LegalContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data/LegalContent.swift"; sourceTree = "<group>"; };
+		00000000000000000000000F /* PaymentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data/PaymentService.swift"; sourceTree = "<group>"; };
+		000000000000000000000010 /* InvoiceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data/InvoiceStore.swift"; sourceTree = "<group>"; };
+		000000000000000000000012 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Components/PrimaryButton.swift"; sourceTree = "<group>"; };
+		000000000000000000000013 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Components/EmptyStateView.swift"; sourceTree = "<group>"; };
+		000000000000000000000015 /* CatalogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Catalog/CatalogView.swift"; sourceTree = "<group>"; };
+		000000000000000000000016 /* BikeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Catalog/BikeCardView.swift"; sourceTree = "<group>"; };
+		000000000000000000000018 /* BikeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/BikeDetail/BikeDetailView.swift"; sourceTree = "<group>"; };
+		00000000000000000000001A /* NewReservationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Reservation/NewReservationView.swift"; sourceTree = "<group>"; };
+		00000000000000000000001B /* ReservationConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Reservation/ReservationConfirmationView.swift"; sourceTree = "<group>"; };
+		00000000000000000000001C /* AvailabilityCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Reservation/AvailabilityCalendarView.swift"; sourceTree = "<group>"; };
+		00000000000000000000001D /* CheckoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Reservation/CheckoutView.swift"; sourceTree = "<group>"; };
+		00000000000000000000001F /* MyReservationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MyReservations/MyReservationsView.swift"; sourceTree = "<group>"; };
+		000000000000000000000020 /* ReservationRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MyReservations/ReservationRowView.swift"; sourceTree = "<group>"; };
+		000000000000000000000021 /* ReservationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MyReservations/ReservationDetailView.swift"; sourceTree = "<group>"; };
+		000000000000000000000023 /* InvoiceDocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Invoices/InvoiceDocumentView.swift"; sourceTree = "<group>"; };
+		000000000000000000000025 /* LegalInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Legal/LegalInfoView.swift"; sourceTree = "<group>"; };
+		000000000000000000000026 /* LegalDocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Legal/LegalDocumentView.swift"; sourceTree = "<group>"; };
+		000000000000000000000029 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Resources/Assets.xcassets"; sourceTree = "<group>"; };
+		00000000000000000000002B /* VelobriereApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VelobriereApp.swift"; sourceTree = "<group>"; };
+		00000000000000000000002C /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootTabView.swift"; sourceTree = "<group>"; };
+		00000000000000000000002E /* Velobriere.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Velobriere.app"; sourceTree = "BUILT_PRODUCTS_DIR"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		000000000000000000000044 /* Frameworks */ = {
+		000000000000000000000055 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -80,7 +96,7 @@
 			name = "DesignSystem";
 			sourceTree = "<group>";
 		};
-		000000000000000000000008 = {
+		00000000000000000000000B = {
 			isa = PBXGroup;
 			children = (
 				000000000000000000000003 /* Bike.swift */,
@@ -88,136 +104,152 @@
 				000000000000000000000005 /* CountryCode.swift */,
 				000000000000000000000006 /* PricingOption.swift */,
 				000000000000000000000007 /* LegalDocument.swift */,
+				000000000000000000000008 /* Payment.swift */,
+				000000000000000000000009 /* Invoice.swift */,
+				00000000000000000000000A /* CancellationPolicy.swift */,
 			);
 			name = "Models";
 			sourceTree = "<group>";
 		};
-		00000000000000000000000C = {
+		000000000000000000000011 = {
 			isa = PBXGroup;
 			children = (
-				000000000000000000000009 /* BikeCatalog.swift */,
-				00000000000000000000000A /* ReservationStore.swift */,
-				00000000000000000000000B /* LegalContent.swift */,
+				00000000000000000000000C /* BikeCatalog.swift */,
+				00000000000000000000000D /* ReservationStore.swift */,
+				00000000000000000000000E /* LegalContent.swift */,
+				00000000000000000000000F /* PaymentService.swift */,
+				000000000000000000000010 /* InvoiceStore.swift */,
 			);
 			name = "Data";
-			sourceTree = "<group>";
-		};
-		00000000000000000000000F = {
-			isa = PBXGroup;
-			children = (
-				00000000000000000000000D /* PrimaryButton.swift */,
-				00000000000000000000000E /* EmptyStateView.swift */,
-			);
-			name = "Components";
-			sourceTree = "<group>";
-		};
-		000000000000000000000012 = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000000010 /* CatalogView.swift */,
-				000000000000000000000011 /* BikeCardView.swift */,
-			);
-			name = "Catalog";
 			sourceTree = "<group>";
 		};
 		000000000000000000000014 = {
 			isa = PBXGroup;
 			children = (
-				000000000000000000000013 /* BikeDetailView.swift */,
+				000000000000000000000012 /* PrimaryButton.swift */,
+				000000000000000000000013 /* EmptyStateView.swift */,
+			);
+			name = "Components";
+			sourceTree = "<group>";
+		};
+		000000000000000000000017 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000015 /* CatalogView.swift */,
+				000000000000000000000016 /* BikeCardView.swift */,
+			);
+			name = "Catalog";
+			sourceTree = "<group>";
+		};
+		000000000000000000000019 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000018 /* BikeDetailView.swift */,
 			);
 			name = "BikeDetail";
-			sourceTree = "<group>";
-		};
-		000000000000000000000018 = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000000015 /* NewReservationView.swift */,
-				000000000000000000000016 /* ReservationConfirmationView.swift */,
-				000000000000000000000017 /* AvailabilityCalendarView.swift */,
-			);
-			name = "Reservation";
-			sourceTree = "<group>";
-		};
-		00000000000000000000001B = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000000019 /* MyReservationsView.swift */,
-				00000000000000000000001A /* ReservationRowView.swift */,
-			);
-			name = "MyReservations";
 			sourceTree = "<group>";
 		};
 		00000000000000000000001E = {
 			isa = PBXGroup;
 			children = (
-				00000000000000000000001C /* LegalInfoView.swift */,
-				00000000000000000000001D /* LegalDocumentView.swift */,
+				00000000000000000000001A /* NewReservationView.swift */,
+				00000000000000000000001B /* ReservationConfirmationView.swift */,
+				00000000000000000000001C /* AvailabilityCalendarView.swift */,
+				00000000000000000000001D /* CheckoutView.swift */,
 			);
-			name = "Legal";
+			name = "Reservation";
 			sourceTree = "<group>";
 		};
-		00000000000000000000001F = {
+		000000000000000000000022 = {
 			isa = PBXGroup;
 			children = (
-				00000000000000000000000F /* Components */,
-				000000000000000000000012 /* Catalog */,
-				000000000000000000000014 /* BikeDetail */,
-				000000000000000000000018 /* Reservation */,
-				00000000000000000000001B /* MyReservations */,
-				00000000000000000000001E /* Legal */,
+				00000000000000000000001F /* MyReservationsView.swift */,
+				000000000000000000000020 /* ReservationRowView.swift */,
+				000000000000000000000021 /* ReservationDetailView.swift */,
 			);
-			name = "Views";
-			sourceTree = "<group>";
-		};
-		000000000000000000000021 = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000000020 /* Assets.xcassets */,
-			);
-			name = "Resources";
+			name = "MyReservations";
 			sourceTree = "<group>";
 		};
 		000000000000000000000024 = {
 			isa = PBXGroup;
 			children = (
-				000000000000000000000022 /* VelobriereApp.swift */,
-				000000000000000000000023 /* RootTabView.swift */,
-				000000000000000000000002 /* DesignSystem */,
-				000000000000000000000008 /* Models */,
-				00000000000000000000000C /* Data */,
-				00000000000000000000001F /* Views */,
-				000000000000000000000021 /* Resources */,
+				000000000000000000000023 /* InvoiceDocumentView.swift */,
 			);
-			name = "Velobriere";
-			path = "Velobriere";
-			sourceTree = "<group>";
-		};
-		000000000000000000000026 = {
-			isa = PBXGroup;
-			children = (
-				000000000000000000000025 /* Velobriere.app */,
-			);
-			name = "Products";
+			name = "Invoices";
 			sourceTree = "<group>";
 		};
 		000000000000000000000027 = {
 			isa = PBXGroup;
 			children = (
-				000000000000000000000024 /* Velobriere */,
-				000000000000000000000026 /* Products */,
+				000000000000000000000025 /* LegalInfoView.swift */,
+				000000000000000000000026 /* LegalDocumentView.swift */,
+			);
+			name = "Legal";
+			sourceTree = "<group>";
+		};
+		000000000000000000000028 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000014 /* Components */,
+				000000000000000000000017 /* Catalog */,
+				000000000000000000000019 /* BikeDetail */,
+				00000000000000000000001E /* Reservation */,
+				000000000000000000000022 /* MyReservations */,
+				000000000000000000000024 /* Invoices */,
+				000000000000000000000027 /* Legal */,
+			);
+			name = "Views";
+			sourceTree = "<group>";
+		};
+		00000000000000000000002A = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000029 /* Assets.xcassets */,
+			);
+			name = "Resources";
+			sourceTree = "<group>";
+		};
+		00000000000000000000002D = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000002B /* VelobriereApp.swift */,
+				00000000000000000000002C /* RootTabView.swift */,
+				000000000000000000000002 /* DesignSystem */,
+				00000000000000000000000B /* Models */,
+				000000000000000000000011 /* Data */,
+				000000000000000000000028 /* Views */,
+				00000000000000000000002A /* Resources */,
+			);
+			name = "Velobriere";
+			path = "Velobriere";
+			sourceTree = "<group>";
+		};
+		00000000000000000000002F = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000002E /* Velobriere.app */,
+			);
+			name = "Products";
+			sourceTree = "<group>";
+		};
+		000000000000000000000030 = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000002D /* Velobriere */,
+				00000000000000000000002F /* Products */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		000000000000000000000040 /* Velobriere */ = {
+		000000000000000000000051 /* Velobriere */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 000000000000000000000047 /* Build configuration list for PBXNativeTarget "Velobriere" */;
+			buildConfigurationList = 000000000000000000000058 /* Build configuration list for PBXNativeTarget "Velobriere" */;
 			buildPhases = (
-				000000000000000000000042 /* Sources */,
-				000000000000000000000044 /* Frameworks */,
-				000000000000000000000043 /* Resources */,
+				000000000000000000000053 /* Sources */,
+				000000000000000000000055 /* Frameworks */,
+				000000000000000000000054 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -225,25 +257,25 @@
 			);
 			name = Velobriere;
 			productName = Velobriere;
-			productReference = 000000000000000000000025 /* Velobriere.app */;
+			productReference = 00000000000000000000002E /* Velobriere.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		000000000000000000000041 /* Project object */ = {
+		000000000000000000000052 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1520;
 				LastUpgradeCheck = 1520;
 				TargetAttributes = {
-					000000000000000000000040 = {
+					000000000000000000000051 = {
 						CreatedOnToolsVersion = 15.2;
 					};
 				};
 			};
-			buildConfigurationList = 00000000000000000000004A /* Build configuration list for PBXProject "Velobriere" */;
+			buildConfigurationList = 00000000000000000000005B /* Build configuration list for PBXProject "Velobriere" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = fr;
 			hasScannedForEncodings = 0;
@@ -251,62 +283,70 @@
 				fr,
 				Base,
 			);
-			mainGroup = 000000000000000000000027;
-			productRefGroup = 000000000000000000000026 /* Products */;
+			mainGroup = 000000000000000000000030;
+			productRefGroup = 00000000000000000000002F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				000000000000000000000040 /* Velobriere */,
+				000000000000000000000051 /* Velobriere */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		000000000000000000000043 /* Resources */ = {
+		000000000000000000000054 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				00000000000000000000003F /* Assets.xcassets in Resources */,
+				000000000000000000000050 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		000000000000000000000042 /* Sources */ = {
+		000000000000000000000053 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000000000000000028 /* VelobriereApp.swift in Sources */,
-				000000000000000000000029 /* RootTabView.swift in Sources */,
-				00000000000000000000002A /* Theme.swift in Sources */,
-				00000000000000000000002B /* Bike.swift in Sources */,
-				00000000000000000000002C /* Reservation.swift in Sources */,
-				00000000000000000000002D /* CountryCode.swift in Sources */,
-				00000000000000000000002E /* PricingOption.swift in Sources */,
-				00000000000000000000002F /* LegalDocument.swift in Sources */,
-				000000000000000000000030 /* BikeCatalog.swift in Sources */,
-				000000000000000000000031 /* ReservationStore.swift in Sources */,
-				000000000000000000000032 /* LegalContent.swift in Sources */,
-				000000000000000000000033 /* PrimaryButton.swift in Sources */,
-				000000000000000000000034 /* EmptyStateView.swift in Sources */,
-				000000000000000000000035 /* CatalogView.swift in Sources */,
-				000000000000000000000036 /* BikeCardView.swift in Sources */,
-				000000000000000000000037 /* BikeDetailView.swift in Sources */,
-				000000000000000000000038 /* NewReservationView.swift in Sources */,
-				000000000000000000000039 /* ReservationConfirmationView.swift in Sources */,
-				00000000000000000000003A /* AvailabilityCalendarView.swift in Sources */,
-				00000000000000000000003B /* MyReservationsView.swift in Sources */,
-				00000000000000000000003C /* ReservationRowView.swift in Sources */,
-				00000000000000000000003D /* LegalInfoView.swift in Sources */,
-				00000000000000000000003E /* LegalDocumentView.swift in Sources */,
+				000000000000000000000031 /* VelobriereApp.swift in Sources */,
+				000000000000000000000032 /* RootTabView.swift in Sources */,
+				000000000000000000000033 /* Theme.swift in Sources */,
+				000000000000000000000034 /* Bike.swift in Sources */,
+				000000000000000000000035 /* Reservation.swift in Sources */,
+				000000000000000000000036 /* CountryCode.swift in Sources */,
+				000000000000000000000037 /* PricingOption.swift in Sources */,
+				000000000000000000000038 /* LegalDocument.swift in Sources */,
+				000000000000000000000039 /* Payment.swift in Sources */,
+				00000000000000000000003A /* Invoice.swift in Sources */,
+				00000000000000000000003B /* CancellationPolicy.swift in Sources */,
+				00000000000000000000003C /* BikeCatalog.swift in Sources */,
+				00000000000000000000003D /* ReservationStore.swift in Sources */,
+				00000000000000000000003E /* LegalContent.swift in Sources */,
+				00000000000000000000003F /* PaymentService.swift in Sources */,
+				000000000000000000000040 /* InvoiceStore.swift in Sources */,
+				000000000000000000000041 /* PrimaryButton.swift in Sources */,
+				000000000000000000000042 /* EmptyStateView.swift in Sources */,
+				000000000000000000000043 /* CatalogView.swift in Sources */,
+				000000000000000000000044 /* BikeCardView.swift in Sources */,
+				000000000000000000000045 /* BikeDetailView.swift in Sources */,
+				000000000000000000000046 /* NewReservationView.swift in Sources */,
+				000000000000000000000047 /* ReservationConfirmationView.swift in Sources */,
+				000000000000000000000048 /* AvailabilityCalendarView.swift in Sources */,
+				000000000000000000000049 /* CheckoutView.swift in Sources */,
+				00000000000000000000004A /* MyReservationsView.swift in Sources */,
+				00000000000000000000004B /* ReservationRowView.swift in Sources */,
+				00000000000000000000004C /* ReservationDetailView.swift in Sources */,
+				00000000000000000000004D /* LegalInfoView.swift in Sources */,
+				00000000000000000000004E /* LegalDocumentView.swift in Sources */,
+				00000000000000000000004F /* InvoiceDocumentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		000000000000000000000048 /* Debug */ = {
+		000000000000000000000059 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			ALWAYS_SEARCH_USER_PATHS = NO;
@@ -368,7 +408,7 @@
 			};
 			name = Debug;
 		};
-		000000000000000000000049 /* Release */ = {
+		00000000000000000000005A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			ALWAYS_SEARCH_USER_PATHS = NO;
@@ -423,7 +463,7 @@
 			};
 			name = Release;
 		};
-		000000000000000000000045 /* Debug */ = {
+		000000000000000000000056 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -454,7 +494,7 @@
 			};
 			name = Debug;
 		};
-		000000000000000000000046 /* Release */ = {
+		000000000000000000000057 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -488,25 +528,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00000000000000000000004A /* Build configuration list for PBXProject "Velobriere" */ = {
+		00000000000000000000005B /* Build configuration list for PBXProject "Velobriere" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				000000000000000000000048 /* Debug */,
-				000000000000000000000049 /* Release */,
+				000000000000000000000059 /* Debug */,
+				00000000000000000000005A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		000000000000000000000047 /* Build configuration list for PBXNativeTarget "Velobriere" */ = {
+		000000000000000000000058 /* Build configuration list for PBXNativeTarget "Velobriere" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				000000000000000000000045 /* Debug */,
-				000000000000000000000046 /* Release */,
+				000000000000000000000056 /* Debug */,
+				000000000000000000000057 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 000000000000000000000041 /* Project object */;
+	rootObject = 000000000000000000000052 /* Project object */;
 }

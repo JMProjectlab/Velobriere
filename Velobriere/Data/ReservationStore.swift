@@ -24,6 +24,37 @@ final class ReservationStore: ObservableObject {
         save()
     }
 
+    func reservation(withID id: UUID) -> Reservation? {
+        reservations.first { $0.id == id }
+    }
+
+    /// Enregistre l'encaissement et le numéro de facture émis.
+    func markPaid(_ reservationID: UUID, result: PaymentResult, invoiceNumber: String) {
+        guard let index = reservations.firstIndex(where: { $0.id == reservationID }) else { return }
+        reservations[index].paymentStatus = .paid
+        reservations[index].paymentMethod = result.method
+        reservations[index].paymentReference = result.transactionReference
+        reservations[index].paidAt = result.processedAt
+        reservations[index].invoiceNumber = invoiceNumber
+        reservations[index].status = .confirmed
+        save()
+    }
+
+    /// Annule une réservation en appliquant les frais éventuels, et conserve le
+    /// détail du remboursement pour l'avoir.
+    func cancel(_ reservationID: UUID, fee: Double, refund: Double, creditNoteNumber: String?) {
+        guard let index = reservations.firstIndex(where: { $0.id == reservationID }) else { return }
+        reservations[index].status = .cancelled
+        reservations[index].cancelledAt = .now
+        reservations[index].cancellationFee = fee
+        reservations[index].refundedAmount = refund
+        reservations[index].creditNoteNumber = creditNoteNumber
+        if reservations[index].paymentStatus == .paid {
+            reservations[index].paymentStatus = .refunded
+        }
+        save()
+    }
+
     /// Nombre de vélos déjà réservés (hors annulations) pour un jour donné.
     func reservedQuantity(bikeId: String, on day: Date) -> Int {
         let calendar = Calendar.current

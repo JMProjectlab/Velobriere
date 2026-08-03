@@ -4,6 +4,7 @@ struct NewReservationView: View {
     let bike: Bike
 
     @EnvironmentObject private var reservationStore: ReservationStore
+    @EnvironmentObject private var invoiceStore: InvoiceStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var startDate = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
@@ -18,6 +19,7 @@ struct NewReservationView: View {
     @State private var customerEmail = ""
     @State private var notes = ""
     @State private var acceptedTerms = false
+    @State private var pendingReservation: Reservation?
     @State private var createdReservation: Reservation?
     @State private var validationMessage: String?
     @State private var presentedDocument: LegalDocument?
@@ -44,6 +46,12 @@ struct NewReservationView: View {
         NavigationStack {
             if let reservation = createdReservation {
                 ReservationConfirmationView(reservation: reservation, onDone: { dismiss() })
+            } else if let pending = pendingReservation {
+                CheckoutView(
+                    reservation: pending,
+                    onPaid: { result in finalise(pending, with: result) },
+                    onCancel: { pendingReservation = nil }
+                )
             } else {
                 form
             }
@@ -202,7 +210,7 @@ struct NewReservationView: View {
                 Button("Annuler") { dismiss() }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Confirmer") { attemptSubmit() }
+                Button("Payer") { attemptSubmit() }
             }
         }
         .onChange(of: startDate) { _, _ in clampQuantity() }
@@ -303,7 +311,20 @@ struct NewReservationView: View {
     }
 
     private func submit() {
-        let reservation = Reservation(
+        pendingReservation = buildReservation()
+    }
+
+    /// Enregistre la réservation payée, émet la facture et affiche la confirmation.
+    private func finalise(_ reservation: Reservation, with result: PaymentResult) {
+        reservationStore.add(reservation)
+        let invoice = invoiceStore.issueInvoice(for: reservation, method: result.method)
+        reservationStore.markPaid(reservation.id, result: result, invoiceNumber: invoice.number)
+        pendingReservation = nil
+        createdReservation = reservationStore.reservation(withID: reservation.id) ?? reservation
+    }
+
+    private func buildReservation() -> Reservation {
+        Reservation(
             id: UUID(),
             bikeId: bike.id,
             bikeName: bike.name,
@@ -313,6 +334,7 @@ struct NewReservationView: View {
             pricingLabel: selectedPricingOption?.label ?? "",
             pricePerUnit: selectedPricingOption?.price ?? 0,
             includesDelivery: includesDelivery,
+            deliveryFee: bike.deliveryFee,
             totalPrice: totalPrice,
             customerFirstName: customerFirstName.trimmingCharacters(in: .whitespaces),
             customerLastName: customerLastName.trimmingCharacters(in: .whitespaces).uppercased(),
@@ -322,9 +344,16 @@ struct NewReservationView: View {
             notes: notes,
             createdAt: .now,
             acceptedTermsAt: .now,
-            status: .pending
+            status: .pending,
+            paymentStatus: .pending,
+            paymentMethod: nil,
+            paymentReference: nil,
+            paidAt: nil,
+            invoiceNumber: nil,
+            cancelledAt: nil,
+            cancellationFee: nil,
+            refundedAmount: nil,
+            creditNoteNumber: nil
         )
-        reservationStore.add(reservation)
-        createdReservation = reservation
     }
 }

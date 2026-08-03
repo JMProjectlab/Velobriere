@@ -47,9 +47,14 @@ struct ReservationRowView: View {
 
     private var statusLabel: String {
         switch reservation.status {
-        case .pending: "En attente de confirmation"
-        case .confirmed: "Confirmée"
-        case .cancelled: "Annulée"
+        case .pending: "En attente de paiement"
+        case .confirmed: "Confirmée · payée"
+        case .cancelled:
+            if let refunded = reservation.refundedAmount, let fee = reservation.cancellationFee, fee > 0 {
+                "Annulée · \(refunded.eur) remboursés"
+            } else {
+                "Annulée · remboursement intégral"
+            }
         }
     }
 }

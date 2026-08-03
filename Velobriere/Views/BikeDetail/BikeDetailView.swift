@@ -4,6 +4,7 @@ struct BikeDetailView: View {
     let bike: Bike
 
     @EnvironmentObject private var reservationStore: ReservationStore
+    @EnvironmentObject private var invoiceStore: InvoiceStore
     @State private var showsReservationSheet = false
 
     var body: some View {
@@ -97,6 +98,8 @@ struct BikeDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showsReservationSheet) {
             NewReservationView(bike: bike)
+                .environmentObject(reservationStore)
+                .environmentObject(invoiceStore)
         }
     }
 

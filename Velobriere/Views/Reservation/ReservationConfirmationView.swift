@@ -20,7 +20,7 @@ struct ReservationConfirmationView: View {
                 .foregroundStyle(Theme.Colors.primary)
 
             VStack(spacing: Theme.Spacing.xs) {
-                Text("Demande envoyée")
+                Text("Réservation confirmée")
                     .font(Theme.Fonts.display(22, weight: .bold))
                     .foregroundStyle(Theme.Colors.ink)
                 Text("\(reservation.bikeName) · du \(Self.dateFormatter.string(from: reservation.startDate)) au \(Self.dateFormatter.string(from: reservation.endDate))")
@@ -30,6 +30,14 @@ struct ReservationConfirmationView: View {
                 Text("\(reservation.pricingLabel) · Total \(reservation.totalPrice.formatted(.currency(code: "EUR")))")
                     .font(Theme.Fonts.body(14, weight: .semibold))
                     .foregroundStyle(Theme.Colors.primaryStrong)
+
+                if let invoiceNumber = reservation.invoiceNumber {
+                    Text("Facture \(invoiceNumber) — disponible dans l'onglet Réservations.")
+                        .font(Theme.Fonts.body(12))
+                        .foregroundStyle(Theme.Colors.inkSoft)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, Theme.Spacing.xs)
+                }
             }
             .padding(.horizontal, Theme.Spacing.lg)
 
