@@ -4,6 +4,7 @@ struct NewReservationView: View {
     let bike: Bike
 
     @EnvironmentObject private var reservationStore: ReservationStore
+    @EnvironmentObject private var invoiceStore: InvoiceStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var startDate = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
@@ -17,8 +18,11 @@ struct NewReservationView: View {
     @State private var customerPhone = ""
     @State private var customerEmail = ""
     @State private var notes = ""
+    @State private var acceptedTerms = false
+    @State private var pendingReservation: Reservation?
     @State private var createdReservation: Reservation?
     @State private var validationMessage: String?
+    @State private var presentedDocument: LegalDocument?
 
     init(bike: Bike) {
         self.bike = bike
@@ -42,6 +46,12 @@ struct NewReservationView: View {
         NavigationStack {
             if let reservation = createdReservation {
                 ReservationConfirmationView(reservation: reservation, onDone: { dismiss() })
+            } else if let pending = pendingReservation {
+                CheckoutView(
+                    reservation: pending,
+                    onPaid: { result in finalise(pending, with: result) },
+                    onCancel: { pendingReservation = nil }
+                )
             } else {
                 form
             }
@@ -116,11 +126,39 @@ struct NewReservationView: View {
                         .keyboardType(.emailAddress)
                         .textContentType(.emailAddress)
                         .textInputAutocapitalization(.never)
+
+                    Text("Ces informations servent uniquement à traiter votre demande de réservation et à vous recontacter. Elles restent enregistrées sur votre appareil.")
+                        .font(Theme.Fonts.body(11))
+                        .foregroundStyle(Theme.Colors.inkSoft)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, Theme.Spacing.xs)
+
+                    Button("En savoir plus sur vos données") {
+                        presentedDocument = LegalContent.confidentialite
+                    }
+                    .font(Theme.Fonts.body(11, weight: .semibold))
+                    .foregroundStyle(Theme.Colors.primaryStrong)
                 }
 
                 card(title: "Remarques") {
                     TextField("Taille, itinéraire souhaité, horaire de retrait…", text: $notes, axis: .vertical)
                         .lineLimit(3...6)
+                }
+
+                card(title: "Conditions") {
+                    Toggle(isOn: $acceptedTerms) {
+                        Text("J'ai lu et j'accepte les conditions générales de location.")
+                            .font(Theme.Fonts.body(13))
+                            .foregroundStyle(Theme.Colors.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .tint(Theme.Colors.primary)
+
+                    Button("Lire les conditions générales de location") {
+                        presentedDocument = LegalContent.conditionsLocation
+                    }
+                    .font(Theme.Fonts.body(12, weight: .semibold))
+                    .foregroundStyle(Theme.Colors.primaryStrong)
                 }
 
                 card(title: "Résumé") {
@@ -172,7 +210,7 @@ struct NewReservationView: View {
                 Button("Annuler") { dismiss() }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Confirmer") { attemptSubmit() }
+                Button("Payer") { attemptSubmit() }
             }
         }
         .onChange(of: startDate) { _, _ in clampQuantity() }
@@ -187,6 +225,16 @@ struct NewReservationView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(validationMessage ?? "")
+        }
+        .sheet(item: $presentedDocument) { document in
+            NavigationStack {
+                LegalDocumentView(document: document)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Fermer") { presentedDocument = nil }
+                        }
+                    }
+            }
         }
     }
 
@@ -222,7 +270,7 @@ struct NewReservationView: View {
         let available = availableForSelectedRange
         let hasAvailabilityIssue = endDate < startDate || available <= 0 || quantity > available
 
-        guard missingFields.isEmpty, !hasAvailabilityIssue else {
+        guard missingFields.isEmpty, !hasAvailabilityIssue, acceptedTerms else {
             var message = ""
             if !missingFields.isEmpty {
                 message += "Merci de renseigner \(listFormatted(missingFields))."
@@ -230,6 +278,10 @@ struct NewReservationView: View {
             if hasAvailabilityIssue {
                 if !message.isEmpty { message += " " }
                 message += "Il ne reste pas assez de vélos disponibles sur la période choisie : ajustez les dates ou la quantité."
+            }
+            if !acceptedTerms {
+                if !message.isEmpty { message += " " }
+                message += "Merci d'accepter les conditions générales de location."
             }
             validationMessage = message
             return
@@ -259,7 +311,20 @@ struct NewReservationView: View {
     }
 
     private func submit() {
-        let reservation = Reservation(
+        pendingReservation = buildReservation()
+    }
+
+    /// Enregistre la réservation payée, émet la facture et affiche la confirmation.
+    private func finalise(_ reservation: Reservation, with result: PaymentResult) {
+        reservationStore.add(reservation)
+        let invoice = invoiceStore.issueInvoice(for: reservation, method: result.method)
+        reservationStore.markPaid(reservation.id, result: result, invoiceNumber: invoice.number)
+        pendingReservation = nil
+        createdReservation = reservationStore.reservation(withID: reservation.id) ?? reservation
+    }
+
+    private func buildReservation() -> Reservation {
+        Reservation(
             id: UUID(),
             bikeId: bike.id,
             bikeName: bike.name,
@@ -269,6 +334,7 @@ struct NewReservationView: View {
             pricingLabel: selectedPricingOption?.label ?? "",
             pricePerUnit: selectedPricingOption?.price ?? 0,
             includesDelivery: includesDelivery,
+            deliveryFee: bike.deliveryFee,
             totalPrice: totalPrice,
             customerFirstName: customerFirstName.trimmingCharacters(in: .whitespaces),
             customerLastName: customerLastName.trimmingCharacters(in: .whitespaces).uppercased(),
@@ -277,9 +343,17 @@ struct NewReservationView: View {
             customerEmail: customerEmail.trimmingCharacters(in: .whitespaces),
             notes: notes,
             createdAt: .now,
-            status: .pending
+            acceptedTermsAt: .now,
+            status: .pending,
+            paymentStatus: .pending,
+            paymentMethod: nil,
+            paymentReference: nil,
+            paidAt: nil,
+            invoiceNumber: nil,
+            cancelledAt: nil,
+            cancellationFee: nil,
+            refundedAmount: nil,
+            creditNoteNumber: nil
         )
-        reservationStore.add(reservation)
-        createdReservation = reservation
     }
 }

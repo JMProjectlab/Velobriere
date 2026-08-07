@@ -19,8 +19,42 @@ final class ReservationStore: ObservableObject {
         save()
     }
 
-    func delete(at offsets: IndexSet) {
-        reservations.remove(atOffsets: offsets)
+    /// Retire une réservation de la liste. Réservé aux réservations déjà
+    /// annulées : une réservation payée doit passer par `cancel(_:)`, qui
+    /// applique les frais et émet l'avoir.
+    func remove(_ reservationID: UUID) {
+        reservations.removeAll { $0.id == reservationID }
+        save()
+    }
+
+    func reservation(withID id: UUID) -> Reservation? {
+        reservations.first { $0.id == id }
+    }
+
+    /// Enregistre l'encaissement et le numéro de facture émis.
+    func markPaid(_ reservationID: UUID, result: PaymentResult, invoiceNumber: String) {
+        guard let index = reservations.firstIndex(where: { $0.id == reservationID }) else { return }
+        reservations[index].paymentStatus = .paid
+        reservations[index].paymentMethod = result.method
+        reservations[index].paymentReference = result.transactionReference
+        reservations[index].paidAt = result.processedAt
+        reservations[index].invoiceNumber = invoiceNumber
+        reservations[index].status = .confirmed
+        save()
+    }
+
+    /// Annule une réservation en appliquant les frais éventuels, et conserve le
+    /// détail du remboursement pour l'avoir.
+    func cancel(_ reservationID: UUID, fee: Double, refund: Double, creditNoteNumber: String?) {
+        guard let index = reservations.firstIndex(where: { $0.id == reservationID }) else { return }
+        reservations[index].status = .cancelled
+        reservations[index].cancelledAt = .now
+        reservations[index].cancellationFee = fee
+        reservations[index].refundedAmount = refund
+        reservations[index].creditNoteNumber = creditNoteNumber
+        if reservations[index].paymentStatus == .paid {
+            reservations[index].paymentStatus = .refunded
+        }
         save()
     }
 
