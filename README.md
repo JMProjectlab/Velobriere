@@ -5,7 +5,7 @@ Deux applications, mêmes fonctionnalités et mêmes règles métier :
 | Dossier | Quoi | Comment l'ouvrir |
 |---|---|---|
 | `Velobriere/` | App iOS (SwiftUI) | `Velobriere.xcodeproj` dans Xcode 15+ |
-| `web/` | Application web responsive | `web/index.html` dans un navigateur — voir [`web/README.md`](web/README.md) |
+| `web/` | Application web responsive | En ligne sur [GitHub Pages](https://jmprojectlab.github.io/Velobriere/), ou `web/index.html` en local — voir [`web/README.md`](web/README.md) |
 
 Les règles d'annulation, de tarification et de facturation sont dupliquées dans
 les deux bases : toute évolution doit être répercutée des deux côtés.
