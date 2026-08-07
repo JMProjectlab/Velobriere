@@ -1,0 +1,58 @@
+name: Déployer l'application web
+
+# Publie le dossier web/ sur GitHub Pages.
+#
+# Prérequis (une seule fois) : dans Settings → Pages du dépôt, régler
+# « Source » sur « GitHub Actions ». Sans cela le déploiement échoue.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/deploy-web.yml'
+  # Permet de déclencher manuellement depuis l'onglet Actions,
+  # y compris depuis une branche, pour prévisualiser avant fusion.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois ; les commits suivants attendent leur tour
+# plutôt que d'annuler un déploiement déjà lancé.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Vérifier que les fichiers attendus sont présents
+        run: |
+          set -e
+          for f in web/index.html web/css/styles.css web/js/app.js \
+                   web/js/data.js web/js/domain.js web/js/store.js web/js/views.js; do
+            test -f "$f" || { echo "::error::Fichier manquant : $f"; exit 1; }
+          done
+          echo "Tous les fichiers de l'application web sont présents."
+
+      - name: Configurer Pages
+        uses: actions/configure-pages@v5
+
+      - name: Préparer l'artefact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - name: Déployer
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -10,9 +10,27 @@ C'est un site statique : aucun serveur, aucune dépendance, aucune étape de
 construction.
 
 - **En local** : ouvrez `web/index.html` dans votre navigateur (double-clic suffit).
-- **En ligne** : déposez le contenu du dossier `web/` sur n'importe quel
-  hébergeur statique (GitHub Pages, Netlify, Vercel, un simple dossier
-  Apache/nginx…). Aucune configuration particulière n'est requise.
+- **En ligne** : le déploiement sur GitHub Pages est automatisé (voir ci-dessous).
+  Le dossier fonctionne aussi tel quel sur n'importe quel autre hébergeur statique
+  (Netlify, Vercel, un simple dossier Apache/nginx…).
+
+## Déploiement sur GitHub Pages
+
+Le workflow [`.github/workflows/deploy-web.yml`](../.github/workflows/deploy-web.yml)
+publie le dossier `web/` à chaque push sur `main` qui le modifie.
+
+**Activation, à faire une seule fois :** dans le dépôt GitHub,
+`Settings` → `Pages` → **Source : GitHub Actions**. Tant que ce réglage n'est pas
+fait, le déploiement échoue avec une erreur d'autorisation.
+
+Une fois activé, le site est servi à l'adresse :
+
+    https://jmprojectlab.github.io/Velobriere/
+
+Le workflow peut aussi être lancé à la main depuis l'onglet `Actions`
+(bouton « Run workflow »). Attention : ce bouton n'apparaît qu'une fois le
+fichier de workflow présent sur la branche par défaut — donc après la première
+fusion dans `main`.
 
 ## Fonctionnalités
 
