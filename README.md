@@ -1,4 +1,18 @@
-# Vélo Brière — App iOS de réservation
+# Vélo Brière — réservation de vélos électriques
+
+Deux applications, mêmes fonctionnalités et mêmes règles métier :
+
+| Dossier | Quoi | Comment l'ouvrir |
+|---|---|---|
+| `Velobriere/` | App iOS (SwiftUI) | `Velobriere.xcodeproj` dans Xcode 15+ |
+| `web/` | Application web responsive | `web/index.html` dans un navigateur — voir [`web/README.md`](web/README.md) |
+
+Les règles d'annulation, de tarification et de facturation sont dupliquées dans
+les deux bases : toute évolution doit être répercutée des deux côtés.
+
+---
+
+## App iOS de réservation
 
 App iOS (SwiftUI) pour réserver un vélo auprès de **Vélo Brière**, location de vélos
 électriques à Saint-Lyphard, au cœur du Parc naturel régional de Brière.

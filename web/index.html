@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vélo Brière — Location de vélos électriques</title>
+  <meta name="description" content="Réservez un vélo à assistance électrique au cœur de la Brière : disponibilités en direct, paiement en ligne, factures et annulation.">
+  <meta name="theme-color" content="#2F6F4F">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚲</text></svg>">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="demo-bar">
+    <div class="demo-bar-inner">
+      <span><strong>Démonstration</strong> — paiement simulé, données enregistrées dans ce navigateur uniquement.</span>
+      <button class="demo-reset" id="demoReset" type="button">↺ Réinitialiser</button>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <button class="brand" data-nav="catalog" type="button">
+        <span class="brand-mark" aria-hidden="true">🚲</span>
+        <span>
+          <span class="brand-name">VÉLO BRIÈRE</span>
+          <span class="brand-tag">Location de vélos électriques</span>
+        </span>
+      </button>
+
+      <nav class="site-nav" aria-label="Navigation principale">
+        <button class="nav-link" data-nav="catalog" type="button">Vélos</button>
+        <button class="nav-link" data-nav="reservations" type="button">Mes réservations</button>
+        <button class="nav-link" data-nav="legal" type="button">Informations</button>
+      </nav>
+
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Changer de thème">☾</button>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>Vélo Brière — 135 Kermouraud, 44410 Saint-Lyphard</span>
+      <a href="tel:+33607343797">06 07 34 37 97</a>
+      <span class="footer-spacer"></span>
+      <button class="btn-link" data-legal="mentions-legales" type="button">Mentions légales</button>
+      <button class="btn-link" data-legal="confidentialite" type="button">Confidentialité</button>
+      <button class="btn-link" data-legal="cgl" type="button">CGL</button>
+    </div>
+  </footer>
+
+  <div class="dialog-backdrop" id="dialogBackdrop">
+    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dialogTitle" aria-describedby="dialogMessage">
+      <h2 id="dialogTitle">Confirmer ?</h2>
+      <p id="dialogMessage"></p>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" id="dialogCancel" type="button">Annuler</button>
+        <button class="btn btn-primary" id="dialogConfirm" type="button">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/domain.js"></script>
+  <script src="js/views.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
