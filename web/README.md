@@ -34,6 +34,8 @@ fusion dans `main`.
 
 ## Fonctionnalités
 
+- **Comptes clients** : inscription, connexion, page compte, changement de mot
+  de passe — voir les limites plus bas
 - Catalogue et fiche vélo, avec la grille tarifaire réelle
 - Calendrier de disponibilité : chaque jour indique les vélos restants
   (vert disponible / sable places limitées / rouge complet)
@@ -82,6 +84,38 @@ Pour encaisser réellement, il faut :
 Le remplacement se limite à `VB.chargePayment` : tout le reste du tunnel est déjà
 en place.
 
+## ⚠️ Les comptes ne sont pas une authentification
+
+Le système de comptes (`js/accounts.js`) fonctionne, mais sans serveur il a trois
+limites qu'il faut connaître avant toute mise en production :
+
+1. **Rien ne vérifie l'identité.** Toute la logique tourne dans le navigateur :
+   qui a accès à l'appareil peut lire ou modifier le `localStorage`, donc se
+   connecter sans mot de passe. Cela protège d'une consultation distraite, pas
+   d'une personne déterminée.
+2. **Les comptes ne suivent pas d'un appareil à l'autre.** Un compte créé sur un
+   ordinateur n'existe pas sur le téléphone du même client. C'est la limite
+   principale : « retrouver ses réservations » ne fonctionne que sur le même
+   navigateur.
+3. **Le hachage n'est pas de qualité production.** Le mot de passe est haché en
+   SHA-256 avec un sel aléatoire par compte — bien mieux qu'un stockage en clair,
+   mais SHA-256 est rapide, donc peu coûteux à attaquer par force brute. Un vrai
+   système hache **côté serveur** avec bcrypt, scrypt ou Argon2.
+
+Pour un usage réel, remplacer `VB.Accounts` par des appels à une API
+(`POST /inscription`, `POST /connexion` renvoyant un jeton, `GET /moi`). Les
+écrans et le reste de l'application n'ont pas à changer.
+
+### Rattachement des réservations
+
+Une réservation porte un `accountId`. Une réservation faite sans être connecté
+reste anonyme ; à l'inscription ou à la connexion, celles dont l'adresse e-mail
+correspond à celle du compte lui sont automatiquement rattachées. C'est ce qui
+permet de créer un compte après coup et d'y retrouver ses réservations passées.
+
+Sans session ouverte, la liste n'affiche que les réservations anonymes de ce
+navigateur ; connecté, uniquement celles du compte.
+
 ## ⚠️ Les textes juridiques sont des squelettes
 
 Les mentions légales, la politique de confidentialité et les CGL contiennent des
@@ -100,7 +134,8 @@ serveur, et les données ne sont pas partagées entre appareils. Le bandeau
 « Réinitialiser » remet la démonstration à son état initial.
 
 Clés utilisées : `velobriere-web-reservations-v1`, `velobriere-web-invoices-v1`,
-`velobriere-web-invoice-counters-v1`, `velobriere-web-theme`.
+`velobriere-web-invoice-counters-v1`, `velobriere-web-accounts-v1`,
+`velobriere-web-session-v1`, `velobriere-web-theme`.
 
 ## Organisation du code
 
@@ -110,6 +145,7 @@ Clés utilisées : `velobriere-web-reservations-v1`, `velobriere-web-invoices-v1
 | `css/styles.css` | Charte graphique, mise en page responsive, thèmes clair/sombre |
 | `js/data.js` | Catalogue, indicatifs, textes légaux |
 | `js/store.js` | État et persistance locale |
+| `js/accounts.js` | Comptes, mots de passe, session, rattachement des réservations |
 | `js/domain.js` | Dates, disponibilité, tarifs, annulation, facturation, paiement |
 | `js/views.js` | Rendu des écrans |
 | `js/app.js` | Routage, brouillon de réservation, évènements |

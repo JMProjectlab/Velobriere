@@ -19,7 +19,7 @@ VB.seedReservations = () => {
   const today = VB.startOfDay(new Date());
   return [
     {
-      id: 'seed-1',
+      id: 'seed-1', accountId: null,
       start: VB.addDays(today, 4), end: VB.addDays(today, 6), quantity: 2,
       pricingLabel: 'Journée', pricePerUnit: 39, includesDelivery: false,
       deliveryFee: VB.BIKE.deliveryFee, totalPrice: 78,
@@ -31,7 +31,7 @@ VB.seedReservations = () => {
       cancelledAt: null, cancellationFee: null, refundedAmount: null, creditNoteNumber: null
     },
     {
-      id: 'seed-2',
+      id: 'seed-2', accountId: null,
       start: VB.addDays(today, 9), end: VB.addDays(today, 10), quantity: 4,
       pricingLabel: 'Semaine', pricePerUnit: 169, includesDelivery: true,
       deliveryFee: VB.BIKE.deliveryFee, totalPrice: 4 * 169 + 10,
@@ -109,6 +109,10 @@ VB.loadInvoices = () => {
 /* ---------- Démo ---------- */
 
 VB.resetDemo = () => {
+  try {
+    localStorage.removeItem(VB.ACCOUNTS_KEY);
+    localStorage.removeItem(VB.SESSION_KEY);
+  } catch (e) { /* stockage indisponible */ }
   VB.state.reservations = VB.seedReservations();
   VB.state.invoices = [];
   try { localStorage.removeItem(VB.INVOICE_COUNTER_KEY); } catch (e) { /* stockage indisponible */ }
@@ -121,6 +125,8 @@ VB.resetDemo = () => {
 
 VB.bootstrapData = () => {
   VB.state.reservations = VB.loadReservations();
+  // Réservations d'avant l'introduction des comptes : elles restent anonymes.
+  VB.state.reservations.forEach(r => { if (r.accountId === undefined) r.accountId = null; });
   VB.state.invoices = VB.loadInvoices();
   if (VB.state.invoices.length === 0) {
     VB.state.reservations.forEach(r => {
