@@ -40,7 +40,9 @@ jobs:
         run: |
           set -e
           for f in web/index.html web/css/styles.css web/js/app.js \
-                   web/js/data.js web/js/domain.js web/js/store.js web/js/views.js; do
+                   web/js/data.js web/js/domain.js web/js/store.js web/js/views.js \
+                   web/js/accounts.js web/assets/logo-mark.jpg \
+                   web/assets/bike-sm.jpg web/assets/bike-lxl.jpg; do
             test -f "$f" || { echo "::error::Fichier manquant : $f"; exit 1; }
           done
           echo "Tous les fichiers de l'application web sont présents."

@@ -18,7 +18,7 @@ struct ReservationRowView: View {
                 .padding(.top, 6)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(reservation.bikeName)
+                Text(reservation.bikeDescription)
                     .font(Theme.Fonts.display(16, weight: .semibold))
                     .foregroundStyle(Theme.Colors.ink)
                 Text("\(Self.dateFormatter.string(from: reservation.startDate)) → \(Self.dateFormatter.string(from: reservation.endDate)) · \(reservation.quantity) vélo\(reservation.quantity > 1 ? "s" : "")")

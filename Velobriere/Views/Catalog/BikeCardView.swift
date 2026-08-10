@@ -7,14 +7,18 @@ struct BikeCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-            ZStack {
-                RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
-                    .fill(Theme.Colors.surfaceAlt)
-                Image(systemName: bike.imageSystemName)
-                    .font(.system(size: 56))
-                    .foregroundStyle(Theme.Colors.primary)
+            HStack(spacing: Theme.Spacing.xs) {
+                ForEach(bike.variants) { variant in
+                    Image(variant.imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 120)
+                        .background(Theme.Colors.surfaceAlt)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+                        .accessibilityLabel("\(bike.name), taille \(variant.size), \(variant.colorName)")
+                }
             }
-            .frame(height: 160)
 
             Text(bike.brand.uppercased())
                 .font(Theme.Fonts.body(11, weight: .semibold))
@@ -29,23 +33,28 @@ struct BikeCardView: View {
                 .font(Theme.Fonts.body(14))
                 .foregroundStyle(Theme.Colors.inkSoft)
 
-            HStack(spacing: Theme.Spacing.sm) {
-                Text(bike.startingPriceLabel)
-                    .font(Theme.Fonts.body(14, weight: .semibold))
-                    .foregroundStyle(Theme.Colors.primaryStrong)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Disponibles aujourd'hui")
+                    .font(Theme.Fonts.body(11))
+                    .foregroundStyle(Theme.Colors.inkSoft)
 
-                Spacer()
-
-                let availableToday = reservationStore.availableUnits(for: bike, on: .now)
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(availableToday > 0 ? Theme.Colors.sage : Theme.Colors.warning)
-                        .frame(width: 6, height: 6)
-                    Text("\(availableToday)/\(bike.totalUnits) dispo.")
-                        .font(Theme.Fonts.body(12, weight: .semibold))
-                        .foregroundStyle(Theme.Colors.inkSoft)
+                HStack(spacing: Theme.Spacing.xs) {
+                    ForEach(bike.variants) { variant in
+                        let available = reservationStore.availableUnits(for: bike, variant: variant, on: .now)
+                        Text("\(variant.size) · \(available)/\(variant.units)")
+                            .font(Theme.Fonts.body(11, weight: .semibold))
+                            .foregroundStyle(available > 0 ? Theme.Colors.primaryStrong : Theme.Colors.warning)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Theme.Colors.surfaceAlt)
+                            .clipShape(Capsule())
+                    }
                 }
             }
+
+            Text(bike.startingPriceLabel)
+                .font(Theme.Fonts.body(14, weight: .semibold))
+                .foregroundStyle(Theme.Colors.primaryStrong)
         }
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.surface)

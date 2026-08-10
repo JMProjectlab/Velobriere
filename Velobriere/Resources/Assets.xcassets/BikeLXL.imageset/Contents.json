@@ -1,17 +1,17 @@
 {
   "images": [
     {
-      "filename": "BrandSymbol@1x.png",
+      "filename": "BikeLXL@1x.png",
       "idiom": "universal",
       "scale": "1x"
     },
     {
-      "filename": "BrandSymbol@2x.png",
+      "filename": "BikeLXL@2x.png",
       "idiom": "universal",
       "scale": "2x"
     },
     {
-      "filename": "BrandSymbol@3x.png",
+      "filename": "BikeLXL@3x.png",
       "idiom": "universal",
       "scale": "3x"
     }

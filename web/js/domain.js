@@ -24,26 +24,35 @@ VB.formatDate = d => new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: '
 VB.formatEUR = n => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
 VB.round2 = n => Math.round(n * 100) / 100;
 
-/* ---------- Disponibilité ---------- */
+/* ---------- Disponibilité ----------
+   Le stock est suivi PAR TAILLE : réserver un S/M ne réduit pas celui des L/XL.
+   `variantId` omis = toutes tailles confondues (vue d'ensemble). */
 
-VB.reservedQuantity = day => {
+VB.variantById = id => VB.BIKE.variants.find(v => v.id === id) || VB.BIKE.variants[0];
+
+VB.unitsFor = variantId =>
+  variantId ? VB.variantById(variantId).units : VB.BIKE.totalUnits;
+
+VB.reservedQuantity = (day, variantId) => {
   const d = VB.startOfDay(day).getTime();
   return VB.state.reservations
     .filter(r => r.status !== 'cancelled')
+    .filter(r => !variantId || r.variantId === variantId)
     .filter(r => VB.startOfDay(r.start).getTime() <= d && d <= VB.startOfDay(r.end).getTime())
     .reduce((sum, r) => sum + r.quantity, 0);
 };
 
-VB.availableOn = day => Math.max(0, VB.BIKE.totalUnits - VB.reservedQuantity(day));
+VB.availableOn = (day, variantId) =>
+  Math.max(0, VB.unitsFor(variantId) - VB.reservedQuantity(day, variantId));
 
 /** Disponibilité minimale sur la période : le jour le plus chargé fait foi. */
-VB.availableRange = (start, end) => {
+VB.availableRange = (start, end, variantId) => {
   let d = VB.startOfDay(start);
   const last = VB.startOfDay(end);
-  if (d > last) return VB.availableOn(d);
+  if (d > last) return VB.availableOn(d, variantId);
   let min = Infinity;
   while (d <= last) {
-    min = Math.min(min, VB.availableOn(d));
+    min = Math.min(min, VB.availableOn(d, variantId));
     d = VB.addDays(d, 1);
   }
   return min;
@@ -164,7 +173,7 @@ VB.invoicesFor = reservationId =>
 
 VB.issueInvoice = (reservation, method) => {
   const lines = [{
-    label: `Location ${VB.BIKE.name} — ${reservation.pricingLabel}`,
+    label: `Location ${VB.BIKE.name} ${reservation.variantLabel} — ${reservation.pricingLabel}`,
     quantity: reservation.quantity,
     unitPrice: reservation.pricePerUnit
   }];

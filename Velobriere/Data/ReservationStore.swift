@@ -58,32 +58,41 @@ final class ReservationStore: ObservableObject {
         save()
     }
 
+    // MARK: - Disponibilité
+    //
+    // Le stock est suivi PAR TAILLE : réserver un S/M ne réduit pas celui des
+    // L/XL. Passer `variant: nil` donne la vue d'ensemble, toutes tailles
+    // confondues (utilisée sur l'accueil et la fiche catalogue).
+
     /// Nombre de vélos déjà réservés (hors annulations) pour un jour donné.
-    func reservedQuantity(bikeId: String, on day: Date) -> Int {
+    /// `variantId` à `nil` compte toutes les tailles.
+    func reservedQuantity(bikeId: String, variantId: String?, on day: Date) -> Int {
         let calendar = Calendar.current
         let day = calendar.startOfDay(for: day)
         return reservations
             .filter { $0.bikeId == bikeId && $0.status != .cancelled }
+            .filter { variantId == nil || $0.variantId == variantId }
             .filter { calendar.startOfDay(for: $0.startDate) <= day && day <= calendar.startOfDay(for: $0.endDate) }
             .reduce(0) { $0 + $1.quantity }
     }
 
-    /// Vélos encore disponibles pour un jour donné.
-    func availableUnits(for bike: Bike, on day: Date) -> Int {
-        max(0, bike.totalUnits - reservedQuantity(bikeId: bike.id, on: day))
+    /// Vélos encore disponibles pour un jour donné, dans la taille demandée.
+    func availableUnits(for bike: Bike, variant: BikeVariant? = nil, on day: Date) -> Int {
+        let capacity = variant?.units ?? bike.totalUnits
+        return max(0, capacity - reservedQuantity(bikeId: bike.id, variantId: variant?.id, on: day))
     }
 
     /// Disponibilité minimale sur toute la période demandée (le jour le plus chargé fait foi).
-    func availableUnits(for bike: Bike, from startDate: Date, to endDate: Date) -> Int {
+    func availableUnits(for bike: Bike, variant: BikeVariant? = nil, from startDate: Date, to endDate: Date) -> Int {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: startDate)
         let end = calendar.startOfDay(for: endDate)
-        guard start <= end else { return availableUnits(for: bike, on: start) }
+        guard start <= end else { return availableUnits(for: bike, variant: variant, on: start) }
 
         var minAvailable = Int.max
         var day = start
         while day <= end {
-            minAvailable = min(minAvailable, availableUnits(for: bike, on: day))
+            minAvailable = min(minAvailable, availableUnits(for: bike, variant: variant, on: day))
             guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
             day = next
         }
@@ -94,7 +103,21 @@ final class ReservationStore: ObservableObject {
         guard let data = try? Data(contentsOf: fileURL) else { return }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        reservations = (try? decoder.decode([Reservation].self, from: data)) ?? []
+        let decoded = (try? decoder.decode([Reservation].self, from: data)) ?? []
+        reservations = decoded.map(migratingVariant)
+    }
+
+    /// Réservations enregistrées avant l'introduction des deux tailles : elles
+    /// sont rattachées à la première taille du catalogue, sans quoi elles
+    /// n'apparaîtraient dans le stock d'aucune taille.
+    private func migratingVariant(_ reservation: Reservation) -> Reservation {
+        guard reservation.variantId == nil else { return reservation }
+        let bike = BikeCatalog.all.first { $0.id == reservation.bikeId } ?? BikeCatalog.eActv100
+        guard let variant = bike.variants.first else { return reservation }
+        var updated = reservation
+        updated.variantId = variant.id
+        updated.variantLabel = variant.size
+        return updated
     }
 
     private func save() {

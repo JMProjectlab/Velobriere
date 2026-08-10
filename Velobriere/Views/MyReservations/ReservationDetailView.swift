@@ -86,6 +86,9 @@ struct ReservationDetailView: View {
     private func summaryCard(_ reservation: Reservation) -> some View {
         card(title: "Votre location") {
             row("Vélo", reservation.bikeName)
+            if let variantLabel = reservation.variantLabel {
+                row("Taille", variantLabel)
+            }
             row("Du", Self.dateFormatter.string(from: reservation.startDate))
             row("Au", Self.dateFormatter.string(from: reservation.endDate))
             row("Formule", reservation.pricingLabel)

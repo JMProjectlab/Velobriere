@@ -309,13 +309,15 @@ h2 { font: 700 clamp(18px, 2.2vw, 21px)/1.25 var(--font-display); margin: 0 0 10
 @media (prefers-reduced-motion: reduce) { .bike-card:hover { transform: none; } }
 
 .bike-thumb {
-  height: 170px;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
   border-radius: var(--radius-control);
-  background: var(--surface-alt);
-  display: grid; place-items: center;
-  font-size: 58px;
+  border: 1px solid var(--line);
   margin-bottom: 6px;
+  display: block;
 }
+.bike-sizes { font-size: 12.5px; color: var(--sage); font-weight: 600; }
 .bike-name { font: 600 18px/1.25 var(--font-display); margin: 0; }
 .bike-tagline { font-size: 14px; color: var(--ink-soft); margin: 0; }
 .bike-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
@@ -344,13 +346,37 @@ h2 { font: 700 clamp(18px, 2.2vw, 21px)/1.25 var(--font-display); margin: 0 0 10
   .split-sticky { position: sticky; top: 92px; }
 }
 
+/* Les photos portent le fond crème de la charte : on les encadre plutôt que
+   de les détourer, ce qui les garde cohérentes sur les deux thèmes. */
 .hero-visual {
-  height: clamp(220px, 32vw, 320px);
   border-radius: var(--radius-card);
-  background: var(--surface-alt);
-  display: grid; place-items: center;
-  font-size: clamp(80px, 12vw, 120px);
+  border: 1px solid var(--line);
+  overflow: hidden;
 }
+.hero-visual img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+
+/* ---------- Choix de la taille ---------- */
+
+.size-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.size-option {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  background: var(--surface); border: 1.5px solid var(--line);
+  border-radius: var(--radius-card); padding: 10px; cursor: pointer;
+  font: inherit; color: inherit; text-align: left;
+  transition: border-color .15s;
+}
+.size-option:hover { border-color: var(--sage); }
+.size-option[aria-pressed="true"] {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 7%, var(--surface));
+}
+.size-option img {
+  width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+  border-radius: 8px; display: block; margin-bottom: 4px;
+}
+.size-name { font: 700 15px/1.2 var(--font-display); color: var(--ink); }
+.size-color { font-size: 12.5px; color: var(--ink-soft); }
+.size-option .avail-pill { margin-top: 2px; }
 .visual-note { font-size: 12px; color: var(--ink-soft); margin: 8px 0 0; }
 
 .highlights { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }

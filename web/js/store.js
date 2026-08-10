@@ -3,7 +3,7 @@
 
 window.VB = window.VB || {};
 
-VB.STORAGE_KEY = 'velobriere-web-reservations-v1';
+VB.STORAGE_KEY = 'velobriere-web-reservations-v2';
 VB.INVOICE_STORAGE_KEY = 'velobriere-web-invoices-v1';
 VB.INVOICE_COUNTER_KEY = 'velobriere-web-invoice-counters-v1';
 
@@ -19,7 +19,7 @@ VB.seedReservations = () => {
   const today = VB.startOfDay(new Date());
   return [
     {
-      id: 'seed-1', accountId: null,
+      id: 'seed-1', accountId: null, variantId: 'sm', variantLabel: 'S / M',
       start: VB.addDays(today, 4), end: VB.addDays(today, 6), quantity: 2,
       pricingLabel: 'Journée', pricePerUnit: 39, includesDelivery: false,
       deliveryFee: VB.BIKE.deliveryFee, totalPrice: 78,
@@ -31,10 +31,10 @@ VB.seedReservations = () => {
       cancelledAt: null, cancellationFee: null, refundedAmount: null, creditNoteNumber: null
     },
     {
-      id: 'seed-2', accountId: null,
-      start: VB.addDays(today, 9), end: VB.addDays(today, 10), quantity: 4,
+      id: 'seed-2', accountId: null, variantId: 'lxl', variantLabel: 'L / XL',
+      start: VB.addDays(today, 9), end: VB.addDays(today, 10), quantity: 2,
       pricingLabel: 'Semaine', pricePerUnit: 169, includesDelivery: true,
-      deliveryFee: VB.BIKE.deliveryFee, totalPrice: 4 * 169 + 10,
+      deliveryFee: VB.BIKE.deliveryFee, totalPrice: 2 * 169 + 10,
       firstName: 'Groupe', lastName: 'RANDO', countryCode: '+33', phone: '06 98 76 54 32',
       email: 'groupe.rando@example.com', notes: 'Casques enfants x2 si possible',
       createdAt: VB.addDays(today, -1), acceptedTermsAt: VB.addDays(today, -1),
@@ -126,7 +126,14 @@ VB.resetDemo = () => {
 VB.bootstrapData = () => {
   VB.state.reservations = VB.loadReservations();
   // Réservations d'avant l'introduction des comptes : elles restent anonymes.
-  VB.state.reservations.forEach(r => { if (r.accountId === undefined) r.accountId = null; });
+  VB.state.reservations.forEach(r => {
+    if (r.accountId === undefined) r.accountId = null;
+    // Réservations d'avant l'introduction des tailles : rattachées à la première.
+    if (!r.variantId) {
+      r.variantId = VB.BIKE.variants[0].id;
+      r.variantLabel = VB.BIKE.variants[0].size;
+    }
+  });
   VB.state.invoices = VB.loadInvoices();
   if (VB.state.invoices.length === 0) {
     VB.state.reservations.forEach(r => {

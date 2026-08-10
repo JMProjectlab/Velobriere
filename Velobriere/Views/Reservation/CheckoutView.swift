@@ -106,6 +106,10 @@ struct CheckoutView: View {
                 .tracking(1.5)
                 .foregroundStyle(Theme.Colors.sage)
 
+            Text(reservation.bikeDescription)
+                .font(Theme.Fonts.body(13))
+                .foregroundStyle(Theme.Colors.inkSoft)
+
             HStack {
                 Text("\(reservation.pricingLabel) × \(reservation.quantity)")
                     .font(Theme.Fonts.body(14))
