@@ -751,3 +751,103 @@ VB.viewAccount = () => {
     </div>
   `;
 };
+
+/* ---------- Page d'accueil ---------- */
+
+/* Icônes tracées à la couleur courante : elles suivent le thème,
+   contrairement aux émojis qui imposent leurs propres couleurs. */
+VB.ICONS = {
+  bike: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="5.5" cy="17.5" r="3.3"></circle><circle cx="18.3" cy="17.5" r="3.3"></circle>
+    <path d="M5.5 17.5 10 9h4l3 4.5 4.8 4"></path><path d="M8.2 9h3"></path></svg>`,
+  calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="4" y="5.5" width="16" height="15" rx="2.6"></rect>
+    <path d="M4 10h16M8 3.5v3.5M16 3.5v3.5"></path>
+    <path d="M8 14.2h.01M12 14.2h.01M16 14.2h.01M8 17.4h.01M12 17.4h.01"></path></svg>`,
+  person: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="8.2" r="3.7"></circle>
+    <path d="M4.8 20.2c.9-3.6 3.8-5.6 7.2-5.6s6.3 2 7.2 5.6"></path></svg>`,
+  info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"></circle><path d="M12 11v5.5"></path><path d="M12 7.6h.01"></path></svg>`
+};
+
+
+
+VB.viewHome = () => {
+  const account = VB.Accounts.current();
+  const avail = VB.availableOn(new Date());
+  const level = VB.levelFor(avail, VB.BIKE.totalUnits);
+  const mine = VB.visibleReservations().filter(r => r.status !== 'cancelled').length;
+
+  const entries = [
+    {
+      nav: 'catalog',
+      icon: VB.ICONS.bike,
+      title: 'Vélos',
+      desc: `Découvrir le vélo, les tarifs et réserver.`,
+      meta: `<span class="avail-pill ${level}"><i></i>${avail}/${VB.BIKE.totalUnits} disponibles</span>`,
+      primary: true
+    },
+    {
+      nav: 'reservations',
+      icon: VB.ICONS.calendar,
+      title: 'Mes réservations',
+      desc: 'Vos locations, vos factures et vos avoirs.',
+      meta: mine > 0
+        ? `<span class="home-count">${mine} en cours</span>`
+        : `<span class="home-muted">Aucune en cours</span>`
+    },
+    account
+      ? {
+          nav: 'account',
+          icon: VB.ICONS.person,
+          title: 'Mon compte',
+          desc: 'Vos coordonnées et votre mot de passe.',
+          meta: `<span class="home-muted">${VB.esc(account.email)}</span>`
+        }
+      : {
+          action: 'go-signin',
+          icon: VB.ICONS.person,
+          title: 'Se connecter',
+          desc: 'Retrouvez vos réservations passées.',
+          meta: `<span class="home-muted">Ou créer un compte</span>`
+        },
+    {
+      nav: 'legal',
+      icon: VB.ICONS.info,
+      title: 'Informations',
+      desc: 'Mentions légales, confidentialité et CGL.',
+      meta: `<span class="home-muted">Nous contacter</span>`
+    }
+  ];
+
+  return `
+    <div class="home">
+      <div class="home-hero">
+        <div class="home-logo">
+          <img src="assets/logo.jpg" alt="Vélo Brière — vélo électrique au bord des marais de Brière" width="480" height="480">
+        </div>
+        <h1 class="home-title">VÉLO BRIÈRE</h1>
+        <p class="home-tagline">Location de vélos électriques</p>
+        <p class="home-lede">Balades électriques au cœur de la Brière, entre marais, villages et chemins.
+        Casque et antivol inclus, livraison possible dans un rayon de ${VB.BIKE.deliveryRadiusKm} km.</p>
+      </div>
+
+      <div class="home-grid">
+        ${entries.map(e => `
+          <button class="home-card ${e.primary ? 'home-card-primary' : ''}"
+                  ${e.nav ? `data-nav="${e.nav}"` : `data-action="${e.action}"`}>
+            <span class="home-card-icon">${e.icon}</span>
+            <span class="home-card-title">${VB.esc(e.title)}</span>
+            <span class="home-card-desc">${VB.esc(e.desc)}</span>
+            <span class="home-card-meta">${e.meta}</span>
+          </button>`).join('')}
+      </div>
+
+      <p class="home-contact">
+        ${VB.esc(VB.CONTACT.address)}, ${VB.esc(VB.CONTACT.postal)} ·
+        <a href="${VB.CONTACT.phoneHref}">${VB.esc(VB.CONTACT.phone)}</a>
+      </p>
+    </div>
+  `;
+};

@@ -8,7 +8,7 @@ VB.INVOICE_STORAGE_KEY = 'velobriere-web-invoices-v1';
 VB.INVOICE_COUNTER_KEY = 'velobriere-web-invoice-counters-v1';
 
 VB.state = {
-  route: { name: 'catalog' },
+  route: { name: 'home' },
   reservations: [],
   invoices: []
 };
@@ -120,7 +120,7 @@ VB.resetDemo = () => {
   // Facture rétroactivement les réservations de démonstration déjà payées.
   VB.state.reservations.forEach(r => { r.invoiceNumber = VB.issueInvoice(r, r.paymentMethod).number; });
   VB.saveReservations();
-  VB.navigate({ name: 'catalog' });
+  VB.navigate({ name: 'home' });
 };
 
 VB.bootstrapData = () => {

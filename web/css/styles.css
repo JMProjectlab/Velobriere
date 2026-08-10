@@ -116,14 +116,15 @@ a { color: var(--primary-strong); }
   padding: 0;
   font: inherit;
 }
+/* Le logo porte son fond crème : on l'encadre plutôt que de le détourer,
+   ce qui le garde lisible sur les deux thèmes. */
 .brand-mark {
   width: 38px; height: 38px;
   border-radius: 10px;
-  background: var(--surface-alt);
   border: 1px solid var(--line);
-  display: grid; place-items: center;
-  font-size: 19px;
+  object-fit: cover;
   flex-shrink: 0;
+  display: block;
 }
 .brand-name {
   display: block;
@@ -708,6 +709,101 @@ textarea.field { resize: vertical; min-height: 78px; font-family: var(--font-bod
   font: 600 12px/1 var(--font-body); color: var(--primary-strong);
 }
 .demo-reset:hover { border-color: var(--primary); }
+
+/* ---------- Page d'accueil ---------- */
+
+.home { max-width: 880px; margin: 0 auto; }
+
+.home-hero { text-align: center; margin-bottom: clamp(28px, 5vw, 44px); }
+
+.home-logo {
+  width: clamp(180px, 34vw, 260px);
+  margin: 0 auto clamp(18px, 3vw, 26px);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 40px -24px rgba(var(--shadow), .5);
+}
+.home-logo img { width: 100%; height: auto; display: block; }
+
+.home-title {
+  font: 700 clamp(28px, 5.5vw, 42px)/1.1 var(--font-display);
+  letter-spacing: .06em;
+  color: var(--primary-strong);
+  margin: 0 0 6px;
+}
+.home-tagline {
+  font: 600 clamp(12px, 1.6vw, 14px)/1 var(--font-body);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin: 0 0 18px;
+}
+.home-lede {
+  font-size: clamp(14.5px, 1.7vw, 16px);
+  color: var(--ink-soft);
+  margin: 0 auto;
+  max-width: 54ch;
+  line-height: 1.6;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 560px) { .home-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 940px) { .home-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  transition: border-color .15s, transform .15s;
+}
+.home-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) { .home-card:hover { transform: none; } }
+
+.home-card-primary { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 7%, var(--surface)); }
+
+.home-card-icon {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary-strong);
+  display: grid; place-items: center;
+  margin-bottom: 8px;
+}
+.home-card-icon svg { width: 20px; height: 20px; display: block; }
+.home-card-primary .home-card-icon { background: var(--primary); color: var(--on-primary); }
+.home-card-title { font: 600 17px/1.25 var(--font-display); color: var(--ink); }
+.home-card-desc { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+.home-card-meta { margin-top: 8px; }
+.home-count {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--primary-strong);
+  font: 700 11.5px/1.5 var(--font-body);
+}
+.home-muted { font-size: 12.5px; color: var(--ink-soft); }
+
+.home-contact {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: clamp(28px, 5vw, 40px) 0 0;
+}
+.home-contact a { font-weight: 600; text-decoration: none; }
+.home-contact a:hover { text-decoration: underline; }
 
 /* ---------- Comptes ---------- */
 

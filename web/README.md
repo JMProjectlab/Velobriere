@@ -34,6 +34,8 @@ fusion dans `main`.
 
 ## Fonctionnalités
 
+- **Page d'accueil** portant le logo de la marque et quatre entrées : Vélos,
+  Mes réservations, Se connecter (ou Mon compte) et Informations
 - **Comptes clients** : inscription, connexion, page compte, changement de mot
   de passe — voir les limites plus bas
 - Catalogue et fiche vélo, avec la grille tarifaire réelle
@@ -142,6 +144,7 @@ Clés utilisées : `velobriere-web-reservations-v1`, `velobriere-web-invoices-v1
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Structure de la page, en-tête, pied de page, boîte de dialogue |
+| `assets/` | Logo de la marque (accueil et pastille d'en-tête) |
 | `css/styles.css` | Charte graphique, mise en page responsive, thèmes clair/sombre |
 | `js/data.js` | Catalogue, indicatifs, textes légaux |
 | `js/store.js` | État et persistance locale |
