@@ -45,6 +45,7 @@ VB.render = () => {
   const r = VB.state.route;
 
   switch (r.name) {
+    case 'home': root.innerHTML = VB.viewHome(); break;
     case 'catalog': root.innerHTML = VB.viewCatalog(); break;
     case 'bike': root.innerHTML = VB.viewBike(); break;
     case 'booking': root.innerHTML = VB.viewBooking(VB.draft); break;
@@ -63,7 +64,8 @@ VB.render = () => {
 
   // Onglet actif : les écrans enfants restent rattachés à leur section.
   const section =
-    ['catalog', 'bike', 'booking', 'checkout', 'confirmation'].includes(r.name) ? 'catalog'
+    r.name === 'home' ? 'home'
+    : ['catalog', 'bike', 'booking', 'checkout', 'confirmation'].includes(r.name) ? 'catalog'
     : ['reservations', 'reservation', 'invoice'].includes(r.name) ? 'reservations'
     : ['signin', 'signup', 'account'].includes(r.name) ? 'account'
     : 'legal';
@@ -439,6 +441,7 @@ VB.bindEvents = () => {
     // Navigation principale
     if (t.dataset.nav) {
       const map = {
+        home: { name: 'home' },
         catalog: { name: 'catalog' },
         reservations: { name: 'reservations' },
         legal: { name: 'legal' },
@@ -450,6 +453,7 @@ VB.bindEvents = () => {
     switch (t.dataset.action) {
       case 'open-bike': return VB.navigate({ name: 'bike' });
       case 'go-catalog': return VB.navigate({ name: 'catalog' });
+      case 'go-home': return VB.navigate({ name: 'home' });
       case 'go-reservations': return VB.navigate({ name: 'reservations' });
       case 'go-legal': return VB.navigate({ name: 'legal' });
       case 'go-signin': return VB.navigate({ name: 'signin' });
