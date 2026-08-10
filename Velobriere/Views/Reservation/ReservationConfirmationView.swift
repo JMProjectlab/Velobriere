@@ -23,7 +23,7 @@ struct ReservationConfirmationView: View {
                 Text("Réservation confirmée")
                     .font(Theme.Fonts.display(22, weight: .bold))
                     .foregroundStyle(Theme.Colors.ink)
-                Text("\(reservation.bikeName) · du \(Self.dateFormatter.string(from: reservation.startDate)) au \(Self.dateFormatter.string(from: reservation.endDate))")
+                Text("\(reservation.bikeDescription) · du \(Self.dateFormatter.string(from: reservation.startDate)) au \(Self.dateFormatter.string(from: reservation.endDate))")
                     .font(Theme.Fonts.body(14))
                     .foregroundStyle(Theme.Colors.inkSoft)
                     .multilineTextAlignment(.center)

@@ -30,7 +30,7 @@ final class InvoiceStore: ObservableObject {
         var lines: [Invoice.Line] = [
             .init(
                 id: "location",
-                label: "Location \(reservation.bikeName) — \(reservation.pricingLabel)",
+                label: "Location \(reservation.bikeName)\(reservation.variantLabel.map { " \($0)" } ?? "") — \(reservation.pricingLabel)",
                 quantity: reservation.quantity,
                 unitPrice: reservation.pricePerUnit
             )

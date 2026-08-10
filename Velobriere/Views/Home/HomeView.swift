@@ -14,6 +14,13 @@ struct HomeView: View {
         reservationStore.availableUnits(for: bike, on: .now)
     }
 
+    /// « S / M : 2 · L / XL : 1 » — le stock est propre à chaque taille.
+    private var availabilityBySize: String {
+        bike.variants
+            .map { "\($0.size) : \(reservationStore.availableUnits(for: bike, variant: $0, on: .now))" }
+            .joined(separator: " · ")
+    }
+
     private var activeReservations: Int {
         reservationStore.reservations.filter { $0.status != .cancelled }.count
     }
@@ -79,14 +86,14 @@ struct HomeView: View {
                 tab: .catalog,
                 icon: "bicycle",
                 title: "Vélos",
-                description: "Découvrir le vélo, les tarifs et réserver.",
+                description: "Deux tailles, \(bike.sizesLabel) : découvrir, comparer et réserver.",
                 highlighted: true
             ) {
                 HStack(spacing: 5) {
                     Circle()
                         .fill(availableToday > 0 ? Theme.Colors.sage : Theme.Colors.warning)
                         .frame(width: 6, height: 6)
-                    Text("\(availableToday)/\(bike.totalUnits) disponibles")
+                    Text(availabilityBySize)
                         .font(Theme.Fonts.body(12, weight: .semibold))
                         .foregroundStyle(Theme.Colors.inkSoft)
                 }

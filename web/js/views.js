@@ -26,10 +26,11 @@ VB.viewCatalog = () => {
 
     <div class="catalog-grid">
       <button class="bike-card" data-action="open-bike">
-        <span class="bike-thumb" aria-hidden="true">🚲</span>
+        <img class="bike-thumb" src="${VB.BIKE.variants[0].image}" alt="${VB.esc(VB.BIKE.name)}" loading="lazy">
         <span class="eyebrow" style="margin:0;">${VB.esc(bike.brand)}</span>
         <span class="bike-name">${VB.esc(bike.name)}</span>
         <span class="bike-tagline">${VB.esc(bike.tagline)}</span>
+        <span class="bike-sizes">${bike.variants.map(v => `${VB.esc(v.size)} · ${VB.esc(v.color)}`).join('  —  ')}</span>
         <span class="bike-meta">
           <span class="price">À partir de ${VB.formatEUR(from)}</span>
           <span class="avail-pill ${level}"><i></i>${avail}/${bike.totalUnits} disponibles</span>
@@ -43,22 +44,41 @@ VB.viewCatalog = () => {
 
 VB.viewBike = () => {
   const bike = VB.BIKE;
-  const avail = VB.availableOn(new Date());
-  const level = VB.levelFor(avail, bike.totalUnits);
+  const variant = VB.variantById(VB.selectedVariantId);
+  const avail = VB.availableOn(new Date(), variant.id);
+  const level = VB.levelFor(avail, variant.units);
 
   return `
     <button class="back-link" data-action="go-catalog">‹ Tous les vélos</button>
 
     <div class="split">
       <div>
-        <div class="hero-visual" aria-hidden="true">🚲</div>
-        <p class="visual-note">Photo à venir — consultez la fiche produit officielle pour les visuels.</p>
+        <div class="hero-visual">
+          <img src="${variant.image}" alt="${VB.esc(bike.name)} taille ${VB.esc(variant.size)}, ${VB.esc(variant.color)}">
+        </div>
+
+        <div class="size-picker" role="group" aria-label="Taille du vélo">
+          ${bike.variants.map(v => {
+            const a = VB.availableOn(new Date(), v.id);
+            return `
+            <button class="size-option" data-variant="${v.id}" aria-pressed="${v.id === variant.id}">
+              <img src="${v.image}" alt="" loading="lazy">
+              <span class="size-name">${VB.esc(v.size)}</span>
+              <span class="size-color">${VB.esc(v.color)}</span>
+              <span class="avail-pill ${VB.levelFor(a, v.units)}"><i></i>${a}/${v.units}</span>
+            </button>`;
+          }).join('')}
+        </div>
+        <p class="visual-note">Un doute sur la taille ? Appelez-nous au
+          <a href="${VB.CONTACT.phoneHref}">${VB.esc(VB.CONTACT.phone)}</a>.</p>
 
         <div class="page-head" style="margin-top:26px;">
           <p class="eyebrow">${VB.esc(bike.brand)}</p>
           <h1>${VB.esc(bike.name)}</h1>
           <p class="lede">${VB.esc(bike.tagline)}</p>
-          <p style="margin:12px 0 0;"><span class="avail-pill ${level}"><i></i>${avail}/${bike.totalUnits} disponibles aujourd'hui</span></p>
+          <p style="margin:12px 0 0;">
+            <span class="avail-pill ${level}"><i></i>Taille ${VB.esc(variant.size)} — ${avail}/${variant.units} disponibles aujourd'hui</span>
+          </p>
         </div>
 
         <div class="card">
@@ -112,10 +132,10 @@ VB.renderCalendar = draft => {
     const date = new Date(year, month, d);
     const iso = VB.toISO(date);
     const isPast = date < today;
-    const avail = VB.availableOn(date);
+    const avail = VB.availableOn(date, draft.variantId);
     const isEdge = VB.sameDay(date, start) || VB.sameDay(date, end);
     const inRange = date >= start && date <= end;
-    const level = VB.levelFor(avail, VB.BIKE.totalUnits);
+    const level = VB.levelFor(avail, VB.unitsFor(draft.variantId));
     const disabled = isPast || avail <= 0;
     const classes = ['day-cell'];
     if (isPast) classes.push('past');
@@ -129,8 +149,9 @@ VB.renderCalendar = draft => {
       </button>`;
   }
 
-  const rangeAvail = VB.availableRange(draft.start, draft.end);
+  const rangeAvail = VB.availableRange(draft.start, draft.end, draft.variantId);
   const ok = rangeAvail > 0;
+  const size = VB.variantById(draft.variantId).size;
 
   return `
     <div class="cal-head">
@@ -148,8 +169,8 @@ VB.renderCalendar = draft => {
     <p class="cal-summary ${ok ? 'ok' : 'ko'}">
       <span>${ok ? '✓' : '⚠'}</span>
       <span>${ok
-        ? `${rangeAvail} vélo${rangeAvail > 1 ? 's' : ''} disponible${rangeAvail > 1 ? 's' : ''} sur la période choisie`
-        : 'Complet sur une partie de cette période'}</span>
+        ? `${rangeAvail} vélo${rangeAvail > 1 ? 's' : ''} en ${VB.esc(size)} disponible${rangeAvail > 1 ? 's' : ''} sur la période choisie`
+        : `Taille ${VB.esc(size)} complète sur une partie de cette période`}</span>
     </p>
   `;
 };
@@ -161,6 +182,7 @@ VB.renderSummary = draft => {
   const base = VB.round2(option.price * draft.quantity);
   const total = VB.computeTotal(draft);
   return `
+    <div class="summary-line"><span>Taille ${VB.esc(VB.variantById(draft.variantId).size)}</span><span class="amt"></span></div>
     <div class="summary-line"><span>${VB.esc(option.label)} × ${draft.quantity}</span><span class="amt">${VB.formatEUR(base)}</span></div>
     ${draft.includesDelivery ? `<div class="summary-line"><span>Livraison</span><span class="amt">${VB.formatEUR(VB.BIKE.deliveryFee)}</span></div>` : ''}
     <div class="summary-total"><span>Total</span><span class="amt">${VB.formatEUR(total)}</span></div>
@@ -168,7 +190,7 @@ VB.renderSummary = draft => {
 };
 
 VB.renderStepper = draft => {
-  const max = Math.max(1, VB.availableRange(draft.start, draft.end));
+  const max = Math.max(1, VB.availableRange(draft.start, draft.end, draft.variantId));
   return `
     <button type="button" class="stepper-btn" data-qty="-1" ${draft.quantity <= 1 ? 'disabled' : ''} aria-label="Retirer un vélo">−</button>
     <span class="stepper-value">${draft.quantity}</span>
@@ -181,7 +203,7 @@ VB.renderStepper = draft => {
 
 VB.viewBooking = draft => {
   const bike = VB.BIKE;
-  const rangeAvail = VB.availableRange(draft.start, draft.end);
+  const rangeAvail = VB.availableRange(draft.start, draft.end, draft.variantId);
 
   return `
     <button class="back-link" data-action="open-bike">‹ Retour au vélo</button>
@@ -195,7 +217,23 @@ VB.viewBooking = draft => {
     <div class="split">
       <div class="stack">
         <div class="card">
-          <p class="section-label">Dates</p>
+          <p class="section-label">Taille</p>
+          <div class="size-picker" id="sizePicker" role="group" aria-label="Taille du vélo">
+            ${bike.variants.map(v => {
+              const a = VB.availableRange(draft.start, draft.end, v.id);
+              return `
+              <button class="size-option" data-variant="${v.id}" aria-pressed="${v.id === draft.variantId}">
+                <img src="${v.image}" alt="" loading="lazy">
+                <span class="size-name">${VB.esc(v.size)}</span>
+                <span class="size-color">${VB.esc(v.color)}</span>
+                <span class="avail-pill ${VB.levelFor(a, v.units)}"><i></i>${a}/${v.units}</span>
+              </button>`;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-label">Dates · taille ${VB.esc(VB.variantById(draft.variantId).size)}</p>
           <div id="calendar">${VB.renderCalendar(draft)}</div>
         </div>
 
@@ -337,7 +375,7 @@ VB.viewCheckout = draft => {
       <div class="split-sticky">
         <div class="card">
           <p class="section-label">Votre commande</p>
-          <div class="summary-line"><span>${VB.esc(VB.BIKE.name)}</span><span class="amt"></span></div>
+          <div class="summary-line"><span>${VB.esc(VB.BIKE.name)} — taille ${VB.esc(VB.variantById(draft.variantId).size)}</span><span class="amt"></span></div>
           <div class="summary-line"><span>Du ${VB.formatShort(draft.start)} au ${VB.formatShort(draft.end)}</span><span class="amt"></span></div>
           <div class="summary-line"><span>${VB.esc(option.label)} × ${draft.quantity}</span><span class="amt">${VB.formatEUR(base)}</span></div>
           ${draft.includesDelivery ? `<div class="summary-line"><span>Livraison</span><span class="amt">${VB.formatEUR(VB.BIKE.deliveryFee)}</span></div>` : ''}
@@ -422,7 +460,7 @@ VB.viewReservations = () => {
           <span class="status-dot ${r.status}"></span>
           <button class="reservation-open" data-reservation="${r.id}">
             <span class="reservation-title">${VB.esc(VB.BIKE.name)}</span>
-            <span class="reservation-dates">${VB.formatShort(r.start)} → ${VB.formatShort(r.end)} · ${r.quantity} vélo${r.quantity > 1 ? 's' : ''}</span>
+            <span class="reservation-dates">${VB.formatShort(r.start)} → ${VB.formatShort(r.end)} · ${r.quantity} vélo${r.quantity > 1 ? 's' : ''} · taille ${VB.esc(r.variantLabel || '—')}</span>
             <span class="reservation-amount">${VB.esc(r.pricingLabel)} · ${VB.formatEUR(r.totalPrice)}</span>
           </button>
           <span class="status-badge ${r.status}">${r.status === 'cancelled' ? 'Annulée' : 'Payée'}</span>
@@ -452,6 +490,7 @@ VB.viewReservationDetail = id => {
         <div class="card">
           <p class="section-label">Votre location</p>
           <div class="detail-row"><span class="k">Vélo</span><span class="v">${VB.esc(VB.BIKE.name)}</span></div>
+          <div class="detail-row"><span class="k">Taille</span><span class="v">${VB.esc(r.variantLabel || '—')}</span></div>
           <div class="detail-row"><span class="k">Du</span><span class="v">${VB.formatDate(r.start)}</span></div>
           <div class="detail-row"><span class="k">Au</span><span class="v">${VB.formatDate(r.end)}</span></div>
           <div class="detail-row"><span class="k">Formule</span><span class="v">${VB.esc(r.pricingLabel)}</span></div>
@@ -784,7 +823,7 @@ VB.viewHome = () => {
       nav: 'catalog',
       icon: VB.ICONS.bike,
       title: 'Vélos',
-      desc: `Découvrir le vélo, les tarifs et réserver.`,
+      desc: `Deux tailles : S/M et L/XL. Tarifs et réservation.`,
       meta: `<span class="avail-pill ${level}"><i></i>${avail}/${VB.BIKE.totalUnits} disponibles</span>`,
       primary: true
     },

@@ -33,10 +33,15 @@ avant mise en production.
 
 - **Catalogue** : un premier vélo, le Decathlon **E-ACTV 100 LF C2**, avec lien vers
   sa fiche produit officielle.
-- **Fiche vélo** : présentation, points forts, prix (« sur devis » tant qu'un tarif
-  n'est pas renseigné dans `BikeCatalog.swift`).
-- **Réservation** : formulaire (dates, nombre de vélos, coordonnées, remarques),
-  écran de confirmation.
+- **Deux tailles** : S/M (vert sauge) et L/XL (blanc), **deux exemplaires chacune**.
+  Le stock est suivi séparément par taille : réserver un S/M ne réduit pas la
+  disponibilité des L/XL. La taille se choisit sur la fiche vélo et dans le
+  formulaire, et se retrouve sur la réservation, la confirmation et la facture.
+- **Fiche vélo** : photos des deux tailles, présentation, points forts et la grille
+  tarifaire réelle (demi-journée 25 €, journée 39 €, week-end 69 €, semaine 169 €,
+  livraison +10 € dans un rayon de 10 km).
+- **Réservation** : formulaire (taille, dates, nombre de vélos, coordonnées,
+  remarques), paiement, écran de confirmation.
 - **Mes réservations** : liste des demandes enregistrées, suppression par glissement.
 - Persistance locale uniquement (fichier JSON dans le dossier Documents de l'app) —
   pas encore de backend ni de synchronisation entre appareils.
@@ -62,8 +67,8 @@ police système tant qu'elles ne sont pas ajoutées. Pour les activer pleinement
   préparation de ce projet (accès pro/restreint) : les caractéristiques précises
   (autonomie, poids, tailles de cadre…) ne sont donc pas affichées pour éviter
   d'inventer des chiffres. L'app renvoie vers la fiche officielle pour ces détails.
-- Aucune photo réelle du vélo n'a pu être récupérée : un espace réservé (icône) est
-  utilisé dans le catalogue et la fiche produit.
+- Les photos utilisées dans le catalogue et la fiche sont celles fournies par Vélo
+  Brière (une par taille), normalisées sur le fond crème de la charte.
 - La réservation est une simple demande stockée sur l'appareil : il n'y a pas encore
   de confirmation par SMS/e-mail ni de vérification de disponibilité réelle. À
   brancher sur un backend (ou un simple envoi d'e-mail/webhook) selon le besoin.

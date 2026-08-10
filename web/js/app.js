@@ -12,6 +12,7 @@ VB.newDraft = () => {
     visibleMonth: VB.startOfDay(new Date()),
     selectingEnd: false,
     quantity: 1,
+    variantId: VB.selectedVariantId || VB.BIKE.variants[0].id,
     pricingOptionId: VB.BIKE.pricingOptions[0].id,
     includesDelivery: false,
     firstName: account ? account.firstName : '',
@@ -25,10 +26,12 @@ VB.newDraft = () => {
 };
 
 VB.draft = null;
+/** Taille retenue sur la fiche vélo, reprise à l'ouverture du formulaire. */
+VB.selectedVariantId = VB.BIKE.variants[0].id;
 VB.currentOption = d => VB.BIKE.pricingOptions.find(o => o.id === d.pricingOptionId) || VB.BIKE.pricingOptions[0];
 VB.computeTotal = d => VB.round2(VB.currentOption(d).price * d.quantity + (d.includesDelivery ? VB.BIKE.deliveryFee : 0));
 VB.clampQuantity = d => {
-  const avail = VB.availableRange(d.start, d.end);
+  const avail = VB.availableRange(d.start, d.end, d.variantId);
   d.quantity = avail > 0 ? Math.min(d.quantity, avail) : 1;
 };
 
@@ -92,7 +95,7 @@ VB.validationProblems = () => {
   if (!d.lastName.trim()) problems.push('lastName');
   if (!VB.isValidPhone(d.countryCode, d.phone)) problems.push('phone');
   if (!VB.isValidEmail(d.email)) problems.push('email');
-  const avail = VB.availableRange(d.start, d.end);
+  const avail = VB.availableRange(d.start, d.end, d.variantId);
   if (avail <= 0 || d.quantity > avail) problems.push('availability');
   if (!d.acceptedTerms) problems.push('terms');
   return problems;
@@ -156,7 +159,7 @@ VB.refreshStepper = () => {
   const el = document.getElementById('stepper');
   if (el) el.innerHTML = VB.renderStepper(VB.draft);
   const warn = document.getElementById('stepperWarning');
-  if (warn) warn.style.display = VB.availableRange(VB.draft.start, VB.draft.end) > 0 ? 'none' : '';
+  if (warn) warn.style.display = VB.availableRange(VB.draft.start, VB.draft.end, VB.draft.variantId) > 0 ? 'none' : '';
 };
 
 /* ---------- Boîte de dialogue ---------- */
@@ -264,6 +267,7 @@ VB.pay = async method => {
   const reservation = {
     id: 'r-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
     start: d.start, end: d.end, quantity: d.quantity,
+    variantId: d.variantId, variantLabel: VB.variantById(d.variantId).size,
     pricingLabel: option.label, pricePerUnit: option.price,
     includesDelivery: d.includesDelivery, deliveryFee: VB.BIKE.deliveryFee,
     totalPrice: VB.computeTotal(d),
@@ -435,7 +439,7 @@ VB.toggleTheme = () => {
 
 VB.bindEvents = () => {
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-action], [data-nav], [data-legal], [data-reservation], [data-invoice], [data-cancel], [data-remove], [data-option], [data-day], [data-month], [data-qty], [data-pay], [data-auth]');
+    const t = e.target.closest('[data-action], [data-nav], [data-legal], [data-reservation], [data-invoice], [data-cancel], [data-remove], [data-option], [data-day], [data-month], [data-qty], [data-pay], [data-auth], [data-variant]');
     if (!t) return;
 
     // Navigation principale
@@ -488,6 +492,19 @@ VB.bindEvents = () => {
       }
     }
 
+    // Choix de la taille : sur la fiche vélo (avant réservation) ou dans le formulaire
+    if (t.dataset.variant) {
+      VB.selectedVariantId = t.dataset.variant;
+      if (VB.state.route.name === 'booking' && VB.draft) {
+        VB.draft.variantId = t.dataset.variant;
+        VB.clampQuantity(VB.draft);
+        VB.render();          // le calendrier et les stocks changent de taille
+      } else {
+        VB.render();          // fiche vélo : photo et disponibilité suivent
+      }
+      return;
+    }
+
     // Formulaire de réservation
     if (t.dataset.option) {
       VB.draft.pricingOptionId = t.dataset.option;
@@ -512,7 +529,7 @@ VB.bindEvents = () => {
     }
     if (t.dataset.qty) {
       const d = VB.draft;
-      const max = Math.max(1, VB.availableRange(d.start, d.end));
+      const max = Math.max(1, VB.availableRange(d.start, d.end, d.variantId));
       d.quantity = Math.min(max, Math.max(1, d.quantity + Number(t.dataset.qty)));
       VB.refreshStepper(); VB.refreshSummary();
       return VB.refreshValidation();

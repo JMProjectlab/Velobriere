@@ -8,12 +8,18 @@ VB.BIKE = {
   brand: 'Decathlon',
   name: 'E-ACTV 100 LF C2',
   tagline: 'Vélo à assistance électrique, cadre bas',
+  /* Deux tailles, deux exemplaires chacune. La disponibilité se compte par
+     taille : réserver un S/M ne réduit pas le stock de L/XL. */
+  variants: [
+    { id: 'sm',  size: 'S / M',  color: 'Vert sauge', image: 'assets/bike-sm.jpg',  units: 2 },
+    { id: 'lxl', size: 'L / XL', color: 'Blanc',      image: 'assets/bike-lxl.jpg', units: 2 }
+  ],
   highlights: [
     'Cadre bas, facile à enfourcher',
     'Assistance électrique pour rouler sans effort',
     'Confortable pour les balades autour de la Brière',
     'Idéal pour découvrir marais, villages et chemins',
-    "Jusqu'à 4 vélos disponibles en simultané",
+    'Deux tailles disponibles : S/M et L/XL, deux exemplaires de chaque',
     'Casque et antivol inclus dans toutes les locations'
   ],
   pricingOptions: [
@@ -24,7 +30,7 @@ VB.BIKE = {
   ],
   deliveryFee: 10,
   deliveryRadiusKm: 10,
-  totalUnits: 4,
+  totalUnits: 4, // = somme des exemplaires de chaque taille
   productURL: 'https://www.decathlonpro.fr/e-actv-100-lf-c2-id-8983925.html'
 };
 

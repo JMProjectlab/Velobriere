@@ -6,11 +6,19 @@ struct BikeDetailView: View {
     @EnvironmentObject private var reservationStore: ReservationStore
     @EnvironmentObject private var invoiceStore: InvoiceStore
     @State private var showsReservationSheet = false
+    @State private var selectedVariantID: String
+
+    init(bike: Bike) {
+        self.bike = bike
+        _selectedVariantID = State(initialValue: bike.variants.first?.id ?? "")
+    }
+
+    private var selectedVariant: BikeVariant { bike.variant(withID: selectedVariantID) }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
-                imagePlaceholder
+                bikePhoto
 
                 VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                     Text(bike.brand.uppercased())
@@ -27,6 +35,8 @@ struct BikeDetailView: View {
                     availabilityBadge
                         .padding(.top, Theme.Spacing.xs)
                 }
+
+                sizePicker
 
                 VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
                     Text("TARIFS")
@@ -97,38 +107,85 @@ struct BikeDetailView: View {
         .navigationTitle(bike.name)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showsReservationSheet) {
-            NewReservationView(bike: bike)
+            NewReservationView(bike: bike, initialVariantID: selectedVariantID)
                 .environmentObject(reservationStore)
                 .environmentObject(invoiceStore)
         }
     }
 
+    /// Disponibilité de la taille sélectionnée : chaque taille a son propre stock.
     private var availabilityBadge: some View {
-        let availableToday = reservationStore.availableUnits(for: bike, on: .now)
+        let variant = selectedVariant
+        let availableToday = reservationStore.availableUnits(for: bike, variant: variant, on: .now)
         return HStack(spacing: 4) {
             Circle()
                 .fill(availableToday > 0 ? Theme.Colors.sage : Theme.Colors.warning)
                 .frame(width: 6, height: 6)
-            Text("\(availableToday)/\(bike.totalUnits) disponibles aujourd'hui")
+            Text("Taille \(variant.size) : \(availableToday)/\(variant.units) disponibles aujourd'hui")
                 .font(Theme.Fonts.body(12, weight: .semibold))
                 .foregroundStyle(Theme.Colors.inkSoft)
         }
     }
 
-    private var imagePlaceholder: some View {
-        VStack(spacing: Theme.Spacing.xs) {
-            ZStack {
-                RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
-                    .fill(Theme.Colors.surfaceAlt)
-                Image(systemName: bike.imageSystemName)
-                    .font(.system(size: 90))
-                    .foregroundStyle(Theme.Colors.primary)
-            }
-            .frame(height: 220)
+    private var bikePhoto: some View {
+        Image(selectedVariant.imageName)
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: .infinity)
+            .frame(height: 240)
+            .background(Theme.Colors.surfaceAlt)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+            .animation(.easeInOut(duration: 0.2), value: selectedVariantID)
+            .accessibilityLabel("\(bike.name), taille \(selectedVariant.size), \(selectedVariant.colorName)")
+    }
 
-            Text("Photo à venir — consultez la fiche produit ci-dessous pour les visuels officiels.")
+    private var sizePicker: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+            Text("TAILLE")
+                .font(Theme.Fonts.body(12, weight: .semibold))
+                .tracking(2)
+                .foregroundStyle(Theme.Colors.sage)
+
+            HStack(spacing: Theme.Spacing.sm) {
+                ForEach(bike.variants) { variant in
+                    sizeOption(variant)
+                }
+            }
+
+            Text("Deux exemplaires par taille. Le stock est suivi séparément : une taille complète n'empêche pas de réserver l'autre.")
                 .font(Theme.Fonts.body(12))
                 .foregroundStyle(Theme.Colors.inkSoft)
+                .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    private func sizeOption(_ variant: BikeVariant) -> some View {
+        let isSelected = variant.id == selectedVariantID
+        let available = reservationStore.availableUnits(for: bike, variant: variant, on: .now)
+        return Button {
+            selectedVariantID = variant.id
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(variant.size)
+                    .font(Theme.Fonts.display(17, weight: .semibold))
+                    .foregroundStyle(Theme.Colors.ink)
+                Text(variant.colorName)
+                    .font(Theme.Fonts.body(12))
+                    .foregroundStyle(Theme.Colors.inkSoft)
+                Text("\(available)/\(variant.units) dispo.")
+                    .font(Theme.Fonts.body(11, weight: .semibold))
+                    .foregroundStyle(available > 0 ? Theme.Colors.primaryStrong : Theme.Colors.warning)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(Theme.Spacing.sm)
+            .background(isSelected ? Theme.Colors.primary.opacity(0.12) : Theme.Colors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                    .stroke(isSelected ? Theme.Colors.primary : Theme.Colors.line, lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }

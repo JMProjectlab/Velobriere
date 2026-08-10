@@ -21,8 +21,12 @@ enum BikeCatalog {
             "Assistance électrique pour rouler sans effort",
             "Confortable pour les balades autour de la Brière",
             "Idéal pour découvrir marais, villages et chemins",
-            "Jusqu'à 4 vélos disponibles en simultané",
+            "Deux tailles : S/M et L/XL, deux exemplaires de chaque",
             "Casque et antivol inclus dans toutes les locations"
+        ],
+        variants: [
+            BikeVariant(id: "sm",  size: "S / M",  colorName: "Vert sauge", imageName: "BikeSM",  units: 2),
+            BikeVariant(id: "lxl", size: "L / XL", colorName: "Blanc",      imageName: "BikeLXL", units: 2)
         ],
         pricingOptions: [
             PricingOption(id: "half-day", label: "Demi-journée", price: 25),
@@ -32,9 +36,7 @@ enum BikeCatalog {
         ],
         deliveryFee: 10,
         deliveryRadiusKm: 10,
-        totalUnits: 4,
-        productURL: URL(string: "https://www.decathlonpro.fr/e-actv-100-lf-c2-id-8983925.html"),
-        imageSystemName: "bicycle"
+        productURL: URL(string: "https://www.decathlonpro.fr/e-actv-100-lf-c2-id-8983925.html")
     )
 
     static let all: [Bike] = [eActv100]

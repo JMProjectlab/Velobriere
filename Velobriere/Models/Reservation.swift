@@ -10,6 +10,12 @@ struct Reservation: Identifiable, Codable {
     let id: UUID
     let bikeId: String
     let bikeName: String
+    /// Taille réservée. Optionnel pour rester compatible avec les réservations
+    /// enregistrées avant l'introduction des deux tailles : `ReservationStore`
+    /// les rattache à la première taille du catalogue au chargement.
+    var variantId: String?
+    /// Libellé de la taille tel qu'affiché au client, par exemple « S / M ».
+    var variantLabel: String?
     var startDate: Date
     var endDate: Date
     var quantity: Int
@@ -49,5 +55,11 @@ struct Reservation: Identifiable, Codable {
 
     var customerFullName: String {
         "\(customerFirstName) \(customerLastName)"
+    }
+
+    /// « E-ACTV 100 LF C2 — taille S / M » (le modèle seul si la taille est inconnue).
+    var bikeDescription: String {
+        guard let variantLabel, !variantLabel.isEmpty else { return bikeName }
+        return "\(bikeName) — taille \(variantLabel)"
     }
 }

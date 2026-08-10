@@ -10,6 +10,7 @@ struct NewReservationView: View {
     @State private var startDate = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
     @State private var endDate = Calendar.current.startOfDay(for: .now).addingTimeInterval(2 * 86_400)
     @State private var quantity = 1
+    @State private var selectedVariantID: String
     @State private var selectedPricingOptionID: String
     @State private var includesDelivery = false
     @State private var customerFirstName = ""
@@ -24,13 +25,17 @@ struct NewReservationView: View {
     @State private var validationMessage: String?
     @State private var presentedDocument: LegalDocument?
 
-    init(bike: Bike) {
+    init(bike: Bike, initialVariantID: String? = nil) {
         self.bike = bike
+        _selectedVariantID = State(initialValue: bike.variant(withID: initialVariantID).id)
         _selectedPricingOptionID = State(initialValue: bike.pricingOptions.first?.id ?? "")
     }
 
+    private var selectedVariant: BikeVariant { bike.variant(withID: selectedVariantID) }
+
+    /// Disponibilité de la taille choisie uniquement : chaque taille a son stock.
     private var availableForSelectedRange: Int {
-        reservationStore.availableUnits(for: bike, from: startDate, to: endDate)
+        reservationStore.availableUnits(for: bike, variant: selectedVariant, from: startDate, to: endDate)
     }
 
     private var selectedPricingOption: PricingOption? {
@@ -61,7 +66,24 @@ struct NewReservationView: View {
     private var form: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                AvailabilityCalendarView(bike: bike, startDate: $startDate, endDate: $endDate)
+                card(title: "Taille") {
+                    HStack(spacing: Theme.Spacing.sm) {
+                        ForEach(bike.variants) { variant in
+                            sizeOption(variant)
+                        }
+                    }
+                    Text("Chaque taille dispose de \(bike.variants.first?.units ?? 0) exemplaires, comptés séparément.")
+                        .font(Theme.Fonts.body(11))
+                        .foregroundStyle(Theme.Colors.inkSoft)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                AvailabilityCalendarView(
+                    bike: bike,
+                    variant: selectedVariant,
+                    startDate: $startDate,
+                    endDate: $endDate
+                )
 
                 card(title: "Formule") {
                     Picker("Durée", selection: $selectedPricingOptionID) {
@@ -89,9 +111,10 @@ struct NewReservationView: View {
                     .disabled(availableForSelectedRange <= 0)
 
                     if availableForSelectedRange <= 0 {
-                        Text("Complet sur cette période. Merci de choisir d'autres dates.")
+                        Text("Taille \(selectedVariant.size) complète sur cette période. Essayez l'autre taille ou d'autres dates.")
                             .font(Theme.Fonts.body(12))
                             .foregroundStyle(Theme.Colors.warning)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
@@ -141,7 +164,7 @@ struct NewReservationView: View {
                 }
 
                 card(title: "Remarques") {
-                    TextField("Taille, itinéraire souhaité, horaire de retrait…", text: $notes, axis: .vertical)
+                    TextField("Itinéraire souhaité, horaire de retrait…", text: $notes, axis: .vertical)
                         .lineLimit(3...6)
                 }
 
@@ -162,6 +185,12 @@ struct NewReservationView: View {
                 }
 
                 card(title: "Résumé") {
+                    HStack {
+                        Text("\(bike.name) — taille \(selectedVariant.size)")
+                            .font(Theme.Fonts.body(14))
+                            .foregroundStyle(Theme.Colors.inkSoft)
+                        Spacer()
+                    }
                     if let option = selectedPricingOption {
                         HStack {
                             Text("\(option.label) × \(quantity)")
@@ -215,6 +244,7 @@ struct NewReservationView: View {
         }
         .onChange(of: startDate) { _, _ in clampQuantity() }
         .onChange(of: endDate) { _, _ in clampQuantity() }
+        .onChange(of: selectedVariantID) { _, _ in clampQuantity() }
         .alert(
             "Impossible de confirmer",
             isPresented: Binding(
@@ -255,6 +285,45 @@ struct NewReservationView: View {
         )
     }
 
+    private func sizeOption(_ variant: BikeVariant) -> some View {
+        let isSelected = variant.id == selectedVariantID
+        let available = reservationStore.availableUnits(for: bike, variant: variant, from: startDate, to: endDate)
+        return Button {
+            selectedVariantID = variant.id
+        } label: {
+            HStack(spacing: Theme.Spacing.sm) {
+                Image(variant.imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 56, height: 42)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(variant.size)
+                        .font(Theme.Fonts.body(14, weight: .semibold))
+                        .foregroundStyle(Theme.Colors.ink)
+                    Text(variant.colorName)
+                        .font(Theme.Fonts.body(11))
+                        .foregroundStyle(Theme.Colors.inkSoft)
+                    Text(available > 0 ? "\(available) dispo." : "Complet")
+                        .font(Theme.Fonts.body(11, weight: .semibold))
+                        .foregroundStyle(available > 0 ? Theme.Colors.primaryStrong : Theme.Colors.warning)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(Theme.Spacing.sm)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(isSelected ? Theme.Colors.primary.opacity(0.12) : Theme.Colors.surfaceAlt)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                    .stroke(isSelected ? Theme.Colors.primary : Theme.Colors.line, lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    }
+
     private func clampQuantity() {
         let available = availableForSelectedRange
         quantity = available > 0 ? min(quantity, available) : 1
@@ -277,7 +346,7 @@ struct NewReservationView: View {
             }
             if hasAvailabilityIssue {
                 if !message.isEmpty { message += " " }
-                message += "Il ne reste pas assez de vélos disponibles sur la période choisie : ajustez les dates ou la quantité."
+                message += "Il ne reste pas assez de vélos en taille \(selectedVariant.size) sur la période choisie : changez de taille, de dates ou de quantité."
             }
             if !acceptedTerms {
                 if !message.isEmpty { message += " " }
@@ -328,6 +397,8 @@ struct NewReservationView: View {
             id: UUID(),
             bikeId: bike.id,
             bikeName: bike.name,
+            variantId: selectedVariant.id,
+            variantLabel: selectedVariant.size,
             startDate: startDate,
             endDate: endDate,
             quantity: quantity,

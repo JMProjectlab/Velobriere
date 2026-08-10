@@ -3,6 +3,8 @@ import SwiftUI
 /// Calendrier mensuel de sélection de dates avec indicateur de vélos disponibles par jour.
 struct AvailabilityCalendarView: View {
     let bike: Bike
+    /// Taille concernée : la disponibilité affichée ne compte que son stock.
+    let variant: BikeVariant
     @Binding var startDate: Date
     @Binding var endDate: Date
 
@@ -25,10 +27,20 @@ struct AvailabilityCalendarView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-            Text("Dates")
-                .font(Theme.Fonts.body(12, weight: .semibold))
-                .tracking(1.5)
-                .foregroundStyle(Theme.Colors.sage)
+            HStack {
+                Text("Dates")
+                    .font(Theme.Fonts.body(12, weight: .semibold))
+                    .tracking(1.5)
+                    .foregroundStyle(Theme.Colors.sage)
+                Spacer()
+                Text("Taille \(variant.size)")
+                    .font(Theme.Fonts.body(11, weight: .semibold))
+                    .foregroundStyle(Theme.Colors.primaryStrong)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Theme.Colors.surfaceAlt)
+                    .clipShape(Capsule())
+            }
 
             monthHeader
             weekdayHeader
@@ -102,7 +114,7 @@ struct AvailabilityCalendarView: View {
     private func dayCell(for date: Date) -> some View {
         let day = calendar.startOfDay(for: date)
         let isPast = day < today
-        let available = reservationStore.availableUnits(for: bike, on: day)
+        let available = reservationStore.availableUnits(for: bike, variant: variant, on: day)
         let isRangeEdge = calendar.isDate(day, inSameDayAs: startDate) || calendar.isDate(day, inSameDayAs: endDate)
         let isInRange = isInSelectedRange(day)
 
@@ -135,7 +147,7 @@ struct AvailabilityCalendarView: View {
     private func indicatorColor(available: Int, isPast: Bool) -> Color {
         guard !isPast else { return .clear }
         if available <= 0 { return Theme.Colors.warning }
-        if available < bike.totalUnits { return Theme.Colors.sand }
+        if available < variant.units { return Theme.Colors.sand }
         return Theme.Colors.sage
     }
 
@@ -159,14 +171,14 @@ struct AvailabilityCalendarView: View {
     }
 
     private var summary: some View {
-        let available = reservationStore.availableUnits(for: bike, from: startDate, to: endDate)
+        let available = reservationStore.availableUnits(for: bike, variant: variant, from: startDate, to: endDate)
         return HStack(spacing: Theme.Spacing.xs) {
             Image(systemName: available > 0 ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                 .foregroundStyle(available > 0 ? Theme.Colors.primary : Theme.Colors.warning)
             Text(
                 available > 0
-                ? "\(available) vélo\(available > 1 ? "s" : "") disponible\(available > 1 ? "s" : "") sur la période choisie"
-                : "Complet sur une partie de cette période"
+                ? "\(available) vélo\(available > 1 ? "s" : "") en \(variant.size) disponible\(available > 1 ? "s" : "") sur la période choisie"
+                : "Taille \(variant.size) complète sur une partie de cette période"
             )
             .font(Theme.Fonts.body(13, weight: .semibold))
             .foregroundStyle(Theme.Colors.ink)

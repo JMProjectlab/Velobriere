@@ -38,11 +38,15 @@ fusion dans `main`.
   Mes réservations, Se connecter (ou Mon compte) et Informations
 - **Comptes clients** : inscription, connexion, page compte, changement de mot
   de passe — voir les limites plus bas
-- Catalogue et fiche vélo, avec la grille tarifaire réelle
-- Calendrier de disponibilité : chaque jour indique les vélos restants
-  (vert disponible / sable places limitées / rouge complet)
-- Réservation : dates, formule, livraison en option, quantité plafonnée à la
-  disponibilité réelle
+- Catalogue et fiche vélo, avec la grille tarifaire réelle et les photos des deux
+  tailles
+- **Deux tailles, stock indépendant** : S/M (vert sauge) et L/XL (blanc), deux
+  exemplaires chacune. Réserver un S/M ne réduit pas la disponibilité des L/XL ;
+  le calendrier, la quantité maximale et la facture suivent la taille choisie
+- Calendrier de disponibilité : chaque jour indique les vélos restants **dans la
+  taille sélectionnée** (vert disponible / sable places limitées / rouge complet)
+- Réservation : taille, dates, formule, livraison en option, quantité plafonnée à
+  la disponibilité réelle de la taille
 - Contrôles de saisie : prénom, nom (mis en majuscules), indicatif pays +
   numéro de téléphone, e-mail avec vérification du domaine, acceptation des CGL
   obligatoire
