@@ -1,0 +1,190 @@
+/* Comptes clients : inscription, connexion, session.
+ *
+ * ⚠️ LIMITES CONNUES — À LIRE AVANT DE METTRE EN PRODUCTION
+ *
+ * Il n'y a pas de serveur : tout se joue dans le navigateur. Par conséquent :
+ *
+ * 1. Ce n'est PAS une authentification. Rien ne vérifie l'identité côté serveur.
+ *    Quiconque accède au navigateur peut lire ou modifier le localStorage, donc
+ *    se connecter sans mot de passe. Cela protège contre une consultation
+ *    distraite, pas contre quelqu'un de déterminé.
+ *
+ * 2. Les comptes ne suivent pas d'un appareil à l'autre. Un compte créé sur un
+ *    ordinateur n'existe pas sur le téléphone du même client.
+ *
+ * 3. Le mot de passe est haché en SHA-256 avec un sel aléatoire par compte —
+ *    nettement mieux qu'un stockage en clair, mais SHA-256 n'est PAS une
+ *    fonction de dérivation de mot de passe : elle est rapide, donc peu coûteuse
+ *    à attaquer par force brute. Un vrai système hache côté serveur avec
+ *    bcrypt, scrypt ou Argon2.
+ *
+ * Pour un usage réel, remplacer VB.Accounts par des appels à une API :
+ * POST /inscription, POST /connexion (qui renvoie un jeton de session),
+ * GET /moi. Les écrans et le reste de l'application n'ont pas à changer.
+ */
+
+window.VB = window.VB || {};
+
+VB.ACCOUNTS_KEY = 'velobriere-web-accounts-v1';
+VB.SESSION_KEY = 'velobriere-web-session-v1';
+
+VB.PASSWORD_MIN_LENGTH = 8;
+
+VB.Accounts = {
+
+  /* ---------- Stockage ---------- */
+
+  all() {
+    try {
+      const raw = localStorage.getItem(VB.ACCOUNTS_KEY);
+      if (!raw) return [];
+      return (JSON.parse(raw) || []).map(a => ({ ...a, createdAt: new Date(a.createdAt) }));
+    } catch (e) { return []; }
+  },
+
+  save(accounts) {
+    try {
+      localStorage.setItem(VB.ACCOUNTS_KEY, JSON.stringify(
+        accounts.map(a => ({ ...a, createdAt: a.createdAt.toISOString() }))
+      ));
+    } catch (e) { /* stockage indisponible */ }
+  },
+
+  normalizeEmail: email => email.trim().toLowerCase(),
+
+  findById(id) {
+    return VB.Accounts.all().find(a => a.id === id) || null;
+  },
+
+  /* ---------- Mots de passe ---------- */
+
+  randomSalt() {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+  },
+
+  async hashPassword(password, salt) {
+    const data = new TextEncoder().encode(`${salt}:${password}`);
+    const buffer = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(buffer)].map(b => b.toString(16).padStart(2, '0')).join('');
+  },
+
+  /** Comparaison à temps constant, pour ne pas fuiter d'information par la durée. */
+  constantTimeEquals(a, b) {
+    if (a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+  },
+
+  /* ---------- Inscription / connexion ---------- */
+
+  /** @returns {Promise<{ok: true, account} | {ok: false, error: string}>} */
+  async signUp({ firstName, lastName, email, countryCode, phone, password }) {
+    const normalized = VB.Accounts.normalizeEmail(email);
+    if (VB.Accounts.all().some(a => a.email === normalized)) {
+      return { ok: false, error: 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous plutôt.' };
+    }
+
+    const salt = VB.Accounts.randomSalt();
+    const account = {
+      id: 'a-' + (crypto.randomUUID ? crypto.randomUUID().slice(0, 12) : Math.random().toString(36).slice(2, 14)),
+      email: normalized,
+      firstName: firstName.trim(),
+      lastName: lastName.trim().toUpperCase(),
+      countryCode,
+      phone: phone.trim(),
+      salt,
+      passwordHash: await VB.Accounts.hashPassword(password, salt),
+      createdAt: new Date()
+    };
+
+    const accounts = VB.Accounts.all();
+    accounts.push(account);
+    VB.Accounts.save(accounts);
+    return { ok: true, account };
+  },
+
+  async signIn(email, password) {
+    const account = VB.Accounts.all().find(a => a.email === VB.Accounts.normalizeEmail(email));
+    // Message identique dans les deux cas : ne pas révéler si l'adresse existe.
+    const genericError = { ok: false, error: 'Adresse e-mail ou mot de passe incorrect.' };
+    if (!account) return genericError;
+
+    const hash = await VB.Accounts.hashPassword(password, account.salt);
+    if (!VB.Accounts.constantTimeEquals(hash, account.passwordHash)) return genericError;
+    return { ok: true, account };
+  },
+
+  async changePassword(accountId, currentPassword, newPassword) {
+    const accounts = VB.Accounts.all();
+    const account = accounts.find(a => a.id === accountId);
+    if (!account) return { ok: false, error: 'Compte introuvable.' };
+
+    const currentHash = await VB.Accounts.hashPassword(currentPassword, account.salt);
+    if (!VB.Accounts.constantTimeEquals(currentHash, account.passwordHash)) {
+      return { ok: false, error: 'Mot de passe actuel incorrect.' };
+    }
+
+    account.salt = VB.Accounts.randomSalt();
+    account.passwordHash = await VB.Accounts.hashPassword(newPassword, account.salt);
+    VB.Accounts.save(accounts);
+    return { ok: true };
+  },
+
+  /* ---------- Session ---------- */
+
+  currentId() {
+    try { return localStorage.getItem(VB.SESSION_KEY); } catch (e) { return null; }
+  },
+
+  current() {
+    const id = VB.Accounts.currentId();
+    return id ? VB.Accounts.findById(id) : null;
+  },
+
+  setSession(accountId) {
+    try { localStorage.setItem(VB.SESSION_KEY, accountId); } catch (e) { /* stockage indisponible */ }
+  },
+
+  clearSession() {
+    try { localStorage.removeItem(VB.SESSION_KEY); } catch (e) { /* stockage indisponible */ }
+  }
+};
+
+/* ---------- Validation du formulaire ---------- */
+
+VB.passwordProblem = password => {
+  if (password.length < VB.PASSWORD_MIN_LENGTH) {
+    return `Le mot de passe doit contenir au moins ${VB.PASSWORD_MIN_LENGTH} caractères.`;
+  }
+  return null;
+};
+
+/* ---------- Rattachement des réservations ---------- */
+
+/**
+ * Rattache au compte les réservations passées faites sans être connecté,
+ * lorsque l'adresse e-mail correspond. C'est ce qui permet de « retrouver »
+ * ses anciennes réservations en créant un compte après coup.
+ * @returns {number} nombre de réservations récupérées
+ */
+VB.claimGuestReservations = account => {
+  let claimed = 0;
+  VB.state.reservations.forEach(r => {
+    if (!r.accountId && r.email && VB.Accounts.normalizeEmail(r.email) === account.email) {
+      r.accountId = account.id;
+      claimed++;
+    }
+  });
+  if (claimed > 0) VB.saveReservations();
+  return claimed;
+};
+
+/** Réservations visibles : celles du compte connecté, ou les réservations
+    anonymes de ce navigateur si personne n'est connecté. */
+VB.visibleReservations = () => {
+  const id = VB.Accounts.currentId();
+  return VB.state.reservations.filter(r => (id ? r.accountId === id : !r.accountId));
+};

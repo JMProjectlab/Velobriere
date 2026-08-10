@@ -4,18 +4,25 @@ window.VB = window.VB || {};
 
 /* ---------- Brouillon ---------- */
 
-VB.newDraft = () => ({
-  start: VB.addDays(new Date(), 1),
-  end: VB.addDays(new Date(), 2),
-  visibleMonth: VB.startOfDay(new Date()),
-  selectingEnd: false,
-  quantity: 1,
-  pricingOptionId: VB.BIKE.pricingOptions[0].id,
-  includesDelivery: false,
-  firstName: '', lastName: '', countryCode: VB.DEFAULT_COUNTRY_CODE,
-  phone: '', email: '', notes: '',
-  acceptedTerms: false
-});
+VB.newDraft = () => {
+  const account = VB.Accounts.current();
+  return {
+    start: VB.addDays(new Date(), 1),
+    end: VB.addDays(new Date(), 2),
+    visibleMonth: VB.startOfDay(new Date()),
+    selectingEnd: false,
+    quantity: 1,
+    pricingOptionId: VB.BIKE.pricingOptions[0].id,
+    includesDelivery: false,
+    firstName: account ? account.firstName : '',
+    lastName: account ? account.lastName : '',
+    countryCode: account ? account.countryCode : VB.DEFAULT_COUNTRY_CODE,
+    phone: account ? account.phone : '',
+    email: account ? account.email : '',
+    notes: '',
+    acceptedTerms: false
+  };
+};
 
 VB.draft = null;
 VB.currentOption = d => VB.BIKE.pricingOptions.find(o => o.id === d.pricingOptionId) || VB.BIKE.pricingOptions[0];
@@ -48,6 +55,9 @@ VB.render = () => {
     case 'invoice': root.innerHTML = VB.viewInvoice(r.id); break;
     case 'legal': root.innerHTML = VB.viewLegalIndex(); break;
     case 'legalDoc': root.innerHTML = VB.viewLegalDoc(r.id); break;
+    case 'signin': root.innerHTML = VB.viewAuth('signin'); break;
+    case 'signup': root.innerHTML = VB.viewAuth('signup'); break;
+    case 'account': root.innerHTML = VB.viewAccount(); break;
     default: root.innerHTML = VB.viewCatalog();
   }
 
@@ -55,12 +65,14 @@ VB.render = () => {
   const section =
     ['catalog', 'bike', 'booking', 'checkout', 'confirmation'].includes(r.name) ? 'catalog'
     : ['reservations', 'reservation', 'invoice'].includes(r.name) ? 'reservations'
+    : ['signin', 'signup', 'account'].includes(r.name) ? 'account'
     : 'legal';
   document.querySelectorAll('.nav-link').forEach(btn => {
     if (btn.dataset.nav === section) btn.setAttribute('aria-current', 'page');
     else btn.removeAttribute('aria-current');
   });
 
+  VB.renderAuthNav();
   if (r.name === 'checkout') VB.refreshCardButton();
 };
 
@@ -265,9 +277,131 @@ VB.pay = async method => {
 
   const invoice = VB.issueInvoice(reservation, method);
   reservation.invoiceNumber = invoice.number;
+  reservation.accountId = VB.Accounts.currentId();
   VB.state.reservations.push(reservation);
   VB.saveReservations();
   VB.navigate({ name: 'confirmation', reservation, invoice });
+};
+
+
+/* ---------- Comptes : en-tête et actions ---------- */
+
+VB.renderAuthNav = () => {
+  const slot = document.getElementById('authNav');
+  if (!slot) return;
+  const account = VB.Accounts.current();
+  slot.innerHTML = account
+    ? `<button class="nav-link account-chip" data-nav="account" type="button" title="${VB.esc(account.email)}">
+         <span class="account-avatar" aria-hidden="true">${VB.esc(account.firstName.charAt(0).toUpperCase() || '?')}</span>
+         <span class="account-chip-name">${VB.esc(account.firstName)}</span>
+       </button>`
+    : `<button class="nav-link" data-action="go-signin" type="button">Se connecter</button>`;
+};
+
+VB.showAuthError = message => {
+  const el = document.getElementById('formAlert');
+  if (!el) return;
+  el.textContent = '⚠ ' + message;
+  el.classList.add('visible');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+VB.hideAuthError = () => document.getElementById('formAlert')?.classList.remove('visible');
+
+VB.val = id => (document.getElementById(id)?.value || '');
+
+VB.handleSignUp = async () => {
+  VB.hideAuthError();
+  const firstName = VB.val('authFirstName').trim();
+  const lastName = VB.val('authLastName').trim();
+  const email = VB.val('authEmail').trim();
+  const countryCode = VB.val('authCountryCode') || VB.DEFAULT_COUNTRY_CODE;
+  const phone = VB.val('authPhone').trim();
+  const password = VB.val('authPassword');
+  const password2 = VB.val('authPassword2');
+
+  const missing = [];
+  if (!firstName) missing.push('votre prénom');
+  if (!lastName) missing.push('votre nom');
+  if (!VB.isValidPhone(countryCode, phone)) missing.push('un numéro de téléphone valide');
+  if (!VB.isValidEmail(email)) missing.push('une adresse e-mail valide');
+  if (missing.length) return VB.showAuthError(`Merci de renseigner ${VB.joinFr(missing)}.`);
+
+  const pwProblem = VB.passwordProblem(password);
+  if (pwProblem) return VB.showAuthError(pwProblem);
+  if (password !== password2) return VB.showAuthError('Les deux mots de passe ne correspondent pas.');
+
+  const result = await VB.Accounts.signUp({ firstName, lastName, email, countryCode, phone, password });
+  if (!result.ok) return VB.showAuthError(result.error);
+
+  VB.Accounts.setSession(result.account.id);
+  const claimed = VB.claimGuestReservations(result.account);
+  VB.navigate({ name: 'reservations' });
+  VB.openDialog({
+    title: 'Compte créé',
+    message: claimed > 0
+      ? `Bienvenue ${result.account.firstName} ! ${claimed} réservation${claimed > 1 ? 's' : ''} faite${claimed > 1 ? 's' : ''} avec cette adresse e-mail ${claimed > 1 ? 'ont' : 'a'} été rattachée${claimed > 1 ? 's' : ''} à votre compte.`
+      : `Bienvenue ${result.account.firstName} ! Vos prochaines réservations seront rattachées à ce compte.`,
+    confirmLabel: 'OK', cancelLabel: 'Fermer', danger: false,
+    onConfirm: () => VB.closeDialog()
+  });
+};
+
+VB.handleSignIn = async () => {
+  VB.hideAuthError();
+  const email = VB.val('authEmail').trim();
+  const password = VB.val('authPassword');
+  if (!email || !password) return VB.showAuthError('Merci de renseigner votre adresse e-mail et votre mot de passe.');
+
+  const result = await VB.Accounts.signIn(email, password);
+  if (!result.ok) return VB.showAuthError(result.error);
+
+  VB.Accounts.setSession(result.account.id);
+  const claimed = VB.claimGuestReservations(result.account);
+  VB.navigate({ name: 'reservations' });
+  if (claimed > 0) {
+    VB.openDialog({
+      title: 'Réservations retrouvées',
+      message: `${claimed} réservation${claimed > 1 ? 's' : ''} faite${claimed > 1 ? 's' : ''} sans compte avec cette adresse e-mail ${claimed > 1 ? 'ont' : 'a'} été rattachée${claimed > 1 ? 's' : ''} à votre compte.`,
+      confirmLabel: 'OK', cancelLabel: 'Fermer', danger: false,
+      onConfirm: () => VB.closeDialog()
+    });
+  }
+};
+
+VB.handleSignOut = () => VB.openDialog({
+  title: 'Se déconnecter ?',
+  message: "Vos réservations restent enregistrées et vous les retrouverez à la prochaine connexion sur ce navigateur.",
+  confirmLabel: 'Se déconnecter',
+  cancelLabel: 'Rester connecté',
+  danger: true,
+  onConfirm: () => {
+    VB.closeDialog();
+    VB.Accounts.clearSession();
+    VB.navigate({ name: 'catalog' });
+  }
+});
+
+VB.handleChangePassword = async () => {
+  VB.hideAuthError();
+  const account = VB.Accounts.current();
+  if (!account) return;
+  const current = VB.val('pwCurrent');
+  const next = VB.val('pwNew');
+
+  const pwProblem = VB.passwordProblem(next);
+  if (pwProblem) return VB.showAuthError(pwProblem);
+
+  const result = await VB.Accounts.changePassword(account.id, current, next);
+  if (!result.ok) return VB.showAuthError(result.error);
+
+  VB.render();
+  VB.openDialog({
+    title: 'Mot de passe mis à jour',
+    message: 'Votre nouveau mot de passe est actif.',
+    confirmLabel: 'OK', cancelLabel: 'Fermer', danger: false,
+    onConfirm: () => VB.closeDialog()
+  });
 };
 
 /* ---------- Thème ---------- */
@@ -299,12 +433,17 @@ VB.toggleTheme = () => {
 
 VB.bindEvents = () => {
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-action], [data-nav], [data-legal], [data-reservation], [data-invoice], [data-cancel], [data-remove], [data-option], [data-day], [data-month], [data-qty], [data-pay]');
+    const t = e.target.closest('[data-action], [data-nav], [data-legal], [data-reservation], [data-invoice], [data-cancel], [data-remove], [data-option], [data-day], [data-month], [data-qty], [data-pay], [data-auth]');
     if (!t) return;
 
     // Navigation principale
     if (t.dataset.nav) {
-      const map = { catalog: { name: 'catalog' }, reservations: { name: 'reservations' }, legal: { name: 'legal' } };
+      const map = {
+        catalog: { name: 'catalog' },
+        reservations: { name: 'reservations' },
+        legal: { name: 'legal' },
+        account: VB.Accounts.currentId() ? { name: 'account' } : { name: 'signin' }
+      };
       return VB.navigate(map[t.dataset.nav]);
     }
 
@@ -313,6 +452,9 @@ VB.bindEvents = () => {
       case 'go-catalog': return VB.navigate({ name: 'catalog' });
       case 'go-reservations': return VB.navigate({ name: 'reservations' });
       case 'go-legal': return VB.navigate({ name: 'legal' });
+      case 'go-signin': return VB.navigate({ name: 'signin' });
+      case 'go-signup': return VB.navigate({ name: 'signup' });
+      case 'go-account': return VB.navigate({ name: 'account' });
       case 'start-booking':
         VB.draft = VB.newDraft();
         VB.clampQuantity(VB.draft);
@@ -333,6 +475,14 @@ VB.bindEvents = () => {
     if (t.dataset.cancel) return VB.askCancel(t.dataset.cancel);
     if (t.dataset.remove) return VB.askRemove(t.dataset.remove);
     if (t.dataset.pay) return VB.pay(t.dataset.pay);
+    if (t.dataset.auth) {
+      switch (t.dataset.auth) {
+        case 'signup': return VB.handleSignUp();
+        case 'signin': return VB.handleSignIn();
+        case 'signout': return VB.handleSignOut();
+        case 'change-password': return VB.handleChangePassword();
+      }
+    }
 
     // Formulaire de réservation
     if (t.dataset.option) {
@@ -395,6 +545,11 @@ VB.bindEvents = () => {
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') VB.closeDialog();
+    if (e.key === 'Enter' && e.target.matches('#authEmail, #authPassword, #authPassword2, #authFirstName, #authLastName, #authPhone')) {
+      e.preventDefault();
+      const btn = document.querySelector('[data-auth="signup"], [data-auth="signin"]');
+      if (btn) btn.click();
+    }
   });
 
   document.getElementById('themeToggle').addEventListener('click', VB.toggleTheme);

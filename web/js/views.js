@@ -380,22 +380,42 @@ VB.statusLabel = r => {
 };
 
 VB.viewReservations = () => {
-  const list = [...VB.state.reservations].sort((a, b) => a.start - b.start);
+  const account = VB.Accounts.current();
+  const list = [...VB.visibleReservations()].sort((a, b) => a.start - b.start);
+
+  // Invitation à créer un compte : seulement hors connexion, et seulement
+  // s'il y a quelque chose à rattacher.
+  const claimBanner = !account && list.length > 0 ? `
+    <div class="notice notice-info" style="margin-bottom:20px;">
+      <span aria-hidden="true">ℹ</span>
+      <span>Ces réservations ne sont rattachées à aucun compte.
+      <button class="btn-link" data-action="go-signup">Créez un compte</button> avec la même adresse e-mail
+      pour les retrouver après vous être déconnecté.</span>
+    </div>` : '';
+
   if (list.length === 0) {
     return `
       <div class="empty-state">
         <div class="glyph" aria-hidden="true">📅</div>
         <h2>Aucune réservation</h2>
-        <p>Vos réservations apparaîtront ici une fois payées depuis la fiche d'un vélo.</p>
-        <p style="margin-top:20px;"><button class="btn btn-primary" data-action="go-catalog">Réserver un vélo</button></p>
+        <p>${account
+          ? "Aucune réservation rattachée à votre compte pour le moment."
+          : "Vos réservations apparaîtront ici une fois payées depuis la fiche d'un vélo."}</p>
+        <p style="margin-top:20px;">
+          <button class="btn btn-primary" data-action="go-catalog">Réserver un vélo</button>
+          ${account ? '' : '<button class="btn btn-secondary" data-action="go-signin" style="margin-left:10px;">J\'ai déjà un compte</button>'}
+        </p>
       </div>`;
   }
 
   return `
     <div class="page-head">
       <h1>Mes réservations</h1>
-      <p class="lede">Retrouvez vos locations, vos factures et vos avoirs.</p>
+      <p class="lede">${account
+        ? `Locations rattachées au compte ${VB.esc(account.email)}.`
+        : 'Retrouvez vos locations, vos factures et vos avoirs.'}</p>
     </div>
+    ${claimBanner}
     <div class="reservation-list">
       ${list.map(r => `
         <div class="reservation-card">
@@ -593,5 +613,141 @@ VB.viewLegalDoc = id => {
         <p class="legal-body">${VB.esc(s.body)}</p>
       </div>`;
     }).join('')}
+  `;
+};
+
+/* ---------- Comptes ---------- */
+
+VB.viewAuth = mode => {
+  const isSignUp = mode === 'signup';
+  return `
+    <div class="auth-wrap">
+      <div class="page-head">
+        <p class="eyebrow">${isSignUp ? 'Créer un compte' : 'Se connecter'}</p>
+        <h1>${isSignUp ? 'Créez votre compte' : 'Bon retour parmi nous'}</h1>
+        <p class="lede">${isSignUp
+          ? "Votre compte regroupe vos réservations, vos factures et vos avoirs, et pré-remplit vos coordonnées."
+          : "Connectez-vous pour retrouver vos réservations et vos factures."}</p>
+      </div>
+
+      <div id="formAlert" class="form-alert" role="alert"></div>
+
+      <div class="card">
+        ${isSignUp ? `
+          <div class="two-col">
+            <div class="field-group">
+              <label class="field-label" for="authFirstName">Prénom</label>
+              <input class="field" id="authFirstName" autocomplete="given-name">
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="authLastName">Nom</label>
+              <input class="field" id="authLastName" autocomplete="family-name">
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="authPhone">Téléphone</label>
+            <div class="field-row">
+              <select class="field" id="authCountryCode" aria-label="Indicatif pays">
+                ${VB.COUNTRY_CODES.map(c => `<option value="${c.code}" ${c.code === VB.DEFAULT_COUNTRY_CODE ? 'selected' : ''}>${c.flag} ${c.code}</option>`).join('')}
+              </select>
+              <input class="field" id="authPhone" type="tel" autocomplete="tel">
+            </div>
+          </div>` : ''}
+
+        <div class="field-group">
+          <label class="field-label" for="authEmail">Adresse e-mail</label>
+          <input class="field" id="authEmail" type="email" autocomplete="email">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="authPassword">Mot de passe</label>
+          <input class="field" id="authPassword" type="password"
+                 autocomplete="${isSignUp ? 'new-password' : 'current-password'}">
+          ${isSignUp ? `<span class="field-hint">Au moins ${VB.PASSWORD_MIN_LENGTH} caractères.</span>` : ''}
+        </div>
+
+        ${isSignUp ? `
+        <div class="field-group">
+          <label class="field-label" for="authPassword2">Confirmer le mot de passe</label>
+          <input class="field" id="authPassword2" type="password" autocomplete="new-password">
+        </div>` : ''}
+
+        <button class="btn btn-primary btn-block" style="margin-top:18px;"
+                data-auth="${isSignUp ? 'signup' : 'signin'}">
+          ${isSignUp ? 'Créer mon compte' : 'Se connecter'}
+        </button>
+
+        <p class="auth-switch">
+          ${isSignUp
+            ? `Vous avez déjà un compte ? <button class="btn-link" data-action="go-signin">Se connecter</button>`
+            : `Pas encore de compte ? <button class="btn-link" data-action="go-signup">En créer un</button>`}
+        </p>
+      </div>
+
+      <div class="notice notice-info" style="margin-top:18px;">
+        <span aria-hidden="true">ℹ</span>
+        <span><strong>Démonstration</strong> — le compte est enregistré dans ce navigateur uniquement.
+        Il ne permet pas encore de retrouver ses réservations depuis un autre appareil :
+        cela demandera un serveur.</span>
+      </div>
+    </div>
+  `;
+};
+
+VB.viewAccount = () => {
+  const account = VB.Accounts.current();
+  if (!account) return VB.viewAuth('signin');
+  const mine = VB.visibleReservations();
+  const active = mine.filter(r => r.status !== 'cancelled').length;
+
+  return `
+    <div class="page-head">
+      <p class="eyebrow">Mon compte</p>
+      <h1>${VB.esc(account.firstName)} ${VB.esc(account.lastName)}</h1>
+      <p class="lede">Compte créé le ${VB.formatDate(account.createdAt)}.</p>
+    </div>
+
+    <div id="formAlert" class="form-alert" role="alert"></div>
+
+    <div class="split">
+      <div class="stack">
+        <div class="card">
+          <p class="section-label">Coordonnées</p>
+          <div class="detail-row"><span class="k">Prénom</span><span class="v">${VB.esc(account.firstName)}</span></div>
+          <div class="detail-row"><span class="k">Nom</span><span class="v">${VB.esc(account.lastName)}</span></div>
+          <div class="detail-row"><span class="k">E-mail</span><span class="v">${VB.esc(account.email)}</span></div>
+          <div class="detail-row"><span class="k">Téléphone</span><span class="v">${VB.esc(account.countryCode)} ${VB.esc(account.phone)}</span></div>
+        </div>
+
+        <div class="card">
+          <p class="section-label">Changer de mot de passe</p>
+          <div class="field-group">
+            <label class="field-label" for="pwCurrent">Mot de passe actuel</label>
+            <input class="field" id="pwCurrent" type="password" autocomplete="current-password">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="pwNew">Nouveau mot de passe</label>
+            <input class="field" id="pwNew" type="password" autocomplete="new-password">
+            <span class="field-hint">Au moins ${VB.PASSWORD_MIN_LENGTH} caractères.</span>
+          </div>
+          <button class="btn btn-secondary btn-block" style="margin-top:14px;" data-auth="change-password">
+            Mettre à jour le mot de passe
+          </button>
+        </div>
+      </div>
+
+      <div class="split-sticky stack">
+        <div class="card">
+          <p class="section-label">Vos locations</p>
+          <div class="detail-row"><span class="k">Réservations actives</span><span class="v">${active}</span></div>
+          <div class="detail-row"><span class="k">Total enregistré</span><span class="v">${mine.length}</span></div>
+          <button class="btn btn-primary btn-block" style="margin-top:14px;" data-action="go-reservations">
+            Voir mes réservations
+          </button>
+        </div>
+
+        <button class="btn btn-secondary btn-block" data-auth="signout">Se déconnecter</button>
+      </div>
+    </div>
   `;
 };
