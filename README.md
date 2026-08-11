@@ -6,9 +6,14 @@ Deux applications, mêmes fonctionnalités et mêmes règles métier :
 |---|---|---|
 | `Velobriere/` | App iOS (SwiftUI) | `Velobriere.xcodeproj` dans Xcode 15+ |
 | `web/` | Application web responsive | En ligne sur [GitHub Pages](https://jmprojectlab.github.io/Velobriere/), ou `web/index.html` en local — voir [`web/README.md`](web/README.md) |
+| `brand/` | Charte graphique | [`brand/charte-graphique.html`](brand/charte-graphique.html) dans un navigateur |
 
 Les règles d'annulation, de tarification et de facturation sont dupliquées dans
 les deux bases : toute évolution doit être répercutée des deux côtés.
+
+La charte est un document de référence : logo, couleurs, typographie, ton de
+voix. Les polices y sont embarquées, elle s'ouvre donc hors ligne. Rien dans
+les deux applications ne la lit — c'est à nous de nous y tenir.
 
 ---
 

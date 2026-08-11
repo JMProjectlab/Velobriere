@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charte graphique — Vélo Brière</title>
+<style>
+/* ---------- Fonts (Poppins / Work Sans / Caveat, Latin + Latin-Ext, self-hosted) ---------- */
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url("./assets/fonts/poppins-600-latin-ext.woff2") format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url("./assets/fonts/poppins-600-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url("./assets/fonts/poppins-700-latin-ext.woff2") format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url("./assets/fonts/poppins-700-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Work Sans';font-style:normal;font-weight:400;font-display:swap;src:url("./assets/fonts/worksans-400-latin-ext.woff2") format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Work Sans';font-style:normal;font-weight:400;font-display:swap;src:url("./assets/fonts/worksans-400-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Work Sans';font-style:normal;font-weight:500;font-display:swap;src:url("./assets/fonts/worksans-500-latin-ext.woff2") format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Work Sans';font-style:normal;font-weight:500;font-display:swap;src:url("./assets/fonts/worksans-500-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Work Sans';font-style:normal;font-weight:600;font-display:swap;src:url("./assets/fonts/worksans-600-latin-ext.woff2") format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Work Sans';font-style:normal;font-weight:600;font-display:swap;src:url("./assets/fonts/worksans-600-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Caveat';font-style:normal;font-weight:600;font-display:swap;src:url("./assets/fonts/caveat-600-latin-ext.woff2") format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Caveat';font-style:normal;font-weight:600;font-display:swap;src:url("./assets/fonts/caveat-600-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+
+/* ---------- Tokens ---------- */
+:root{
+  --forest-fixed:#2F6F4F;
+  --forest-fixed-deep:#204F38;
+  --sage-fixed:#7DA17A;
+  --sand-fixed:#E6D3A3;
+  --cream-fixed:#F5F2E9;
+  --ink-fixed:#1F1F1F;
+
+  --bg:#F5F2E9;
+  --surface:#FFFFFF;
+  --surface-2:#EFEAE0;
+  --ink:#1F1F1F;
+  --ink-soft:#4B564F;
+  --line:#DBD3C2;
+  --accent:#2F6F4F;
+  --accent-soft:#7DA17A;
+
+  --font-display:'Poppins',"Century Gothic","Futura","Segoe UI",sans-serif;
+  --font-body:'Work Sans',"Segoe UI",Roboto,sans-serif;
+  --font-script:'Caveat',"Segoe Script",cursive;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141F19;
+    --surface:#1B2A22;
+    --surface-2:#20342A;
+    --ink:#F1EEE4;
+    --ink-soft:#B9C4BC;
+    --line:#2C4033;
+    --accent:#8FC49A;
+    --accent-soft:#9CC2A0;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141F19; --surface:#1B2A22; --surface-2:#20342A; --ink:#F1EEE4; --ink-soft:#B9C4BC; --line:#2C4033; --accent:#8FC49A; --accent-soft:#9CC2A0;
+}
+:root[data-theme="light"]{
+  --bg:#F5F2E9; --surface:#FFFFFF; --surface-2:#EFEAE0; --ink:#1F1F1F; --ink-soft:#4B564F; --line:#DBD3C2; --accent:#2F6F4F; --accent-soft:#7DA17A;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation:none !important; transition:none !important;} }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.6;
+}
+
+a{color:inherit;}
+
+.layout{display:grid; grid-template-columns:264px minmax(0,1fr); min-height:100vh;}
+@media (max-width:900px){ .layout{grid-template-columns:1fr;} }
+
+/* ---------- Sidebar (a live example of the reversed lockup) ---------- */
+.sidebar{
+  background:linear-gradient(180deg,var(--forest-fixed-deep),var(--forest-fixed));
+  color:var(--cream-fixed);
+  padding:2.25rem 1.85rem;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  display:flex; flex-direction:column; gap:2.25rem;
+}
+@media (max-width:900px){ .sidebar{position:static; height:auto;} }
+
+.brandmark{display:flex; flex-direction:column; gap:.15rem;}
+.brandmark .velo{font-family:var(--font-display); font-weight:700; font-size:1.7rem; letter-spacing:.03em;}
+.brandmark .briere{font-family:var(--font-display); font-weight:600; font-size:1.05rem; letter-spacing:.28em; color:var(--sand-fixed); margin-left:.05em;}
+.brandmark .sub{font-family:var(--font-body); font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,242,233,.65); margin-top:.4rem;}
+
+.nav{display:flex; flex-direction:column; gap:.15rem; font-size:.92rem;}
+.nav a{
+  color:rgba(245,242,233,.78); text-decoration:none; padding:.5rem .65rem; border-radius:8px;
+  border-left:2px solid transparent;
+}
+.nav a:hover, .nav a:focus-visible{ background:rgba(245,242,233,.08); color:#fff; }
+.nav a:focus-visible{ outline:2px solid var(--sand-fixed); outline-offset:2px; }
+.nav .n{font-variant-numeric:tabular-nums; opacity:.55; margin-right:.55rem; font-size:.8em;}
+
+.sidebar-foot{margin-top:auto; font-size:.75rem; color:rgba(245,242,233,.5); line-height:1.7;}
+
+/* ---------- Main ---------- */
+main{padding: 0 0 6rem;}
+.section{padding:4.5rem clamp(1.5rem,4vw,4.5rem) 0; max-width:980px;}
+.section + .section{border-top:1px solid var(--line);}
+.eyebrow{
+  font-family:var(--font-body); font-weight:600; font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--accent); display:flex; align-items:center; gap:.6rem; margin:0 0 1rem;
+}
+.eyebrow::before{content:""; width:22px; height:1px; background:var(--accent-soft);}
+h2{font-family:var(--font-display); font-weight:700; font-size:clamp(1.6rem,3vw,2.15rem); margin:0 0 .5rem; text-wrap:balance;}
+h3{font-family:var(--font-display); font-weight:600; font-size:1.15rem; margin:2rem 0 .75rem;}
+.lede{font-size:1.05rem; color:var(--ink-soft); max-width:62ch; margin:0 0 2rem;}
+p{max-width:68ch;}
+.grid-note{color:var(--ink-soft); font-size:.92rem;}
+
+/* ---------- Hero ---------- */
+.hero{position:relative; padding-top:5.5rem; overflow:hidden;}
+.hero-arc{
+  position:absolute; left:50%; top:2.2rem; width:min(560px,86vw); height:min(280px,44vw);
+  transform:translateX(-50%); border:2px solid var(--sand-fixed); border-bottom:none;
+  border-radius:560px 560px 0 0; opacity:.55; pointer-events:none;
+}
+.hero-inner{position:relative; text-align:center; display:flex; flex-direction:column; align-items:center; gap:1.1rem;}
+.hero-word{font-family:var(--font-display); line-height:.95; display:flex; flex-direction:column; align-items:center;}
+.hero-word .l1{font-weight:700; font-size:clamp(2.6rem,8vw,4.4rem); letter-spacing:.05em; color:var(--accent);}
+.hero-word .l2{font-weight:600; font-size:clamp(1.3rem,4vw,2rem); letter-spacing:.42em; color:var(--accent-soft); margin-top:.35rem; margin-left:.42em;}
+.hero-tag{font-family:var(--font-body); font-weight:600; font-size:.78rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-soft);}
+.hero-script{font-family:var(--font-script); font-size:clamp(1.6rem,3.4vw,2.1rem); color:var(--accent); font-weight:600;}
+.pillars{display:flex; gap:clamp(1.5rem,5vw,3.5rem); margin-top:2.25rem; flex-wrap:wrap; justify-content:center;}
+.pillar{display:flex; flex-direction:column; align-items:center; gap:.65rem; width:110px;}
+.badge{width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.badge svg{width:28px; height:28px;}
+.pillar span{font-size:.82rem; font-weight:600; letter-spacing:.02em;}
+.badge.b-sage{background:var(--sage-fixed); color:var(--cream-fixed);}
+.badge.b-sand{background:var(--sand-fixed); color:var(--forest-fixed-deep);}
+.badge.b-pale{background:#D8E3D2; color:var(--forest-fixed-deep);}
+
+/* ---------- Logo section ---------- */
+.logo-grid{display:grid; grid-template-columns:280px minmax(0,1fr); gap:2.5rem; align-items:start; margin-top:1rem;}
+@media (max-width:720px){ .logo-grid{grid-template-columns:1fr;} }
+.logo-frame{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.75rem; display:flex; align-items:center; justify-content:center;}
+.logo-frame img{width:100%; max-width:220px; height:auto; display:block;}
+.construction-list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.85rem;}
+.construction-list li{display:flex; gap:.75rem; font-size:.95rem;}
+.construction-list .dot{flex-shrink:0; width:8px; height:8px; border-radius:50%; background:var(--accent-soft); margin-top:.5rem;}
+
+.lockup-row{display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:1.75rem;}
+@media (max-width:560px){ .lockup-row{grid-template-columns:1fr;} }
+.lockup{border-radius:14px; padding:2rem 1.25rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:.6rem;}
+.lockup.on-cream{background:var(--cream-fixed); border:1px solid var(--line);}
+.lockup.on-forest{background:var(--forest-fixed);}
+.lockup .mini{font-family:var(--font-display); font-weight:700; font-size:1.3rem; letter-spacing:.03em;}
+.lockup .mini2{font-family:var(--font-display); font-weight:600; font-size:.72rem; letter-spacing:.3em; margin-top:.1rem;}
+.lockup.on-cream .mini{color:var(--forest-fixed);} .lockup.on-cream .mini2{color:var(--sage-fixed);}
+.lockup.on-forest .mini{color:var(--cream-fixed);} .lockup.on-forest .mini2{color:var(--sand-fixed);}
+.lockup .cap{font-size:.75rem; color:var(--ink-soft); margin-top:.35rem;}
+.lockup.on-forest .cap{color:rgba(245,242,233,.65);}
+
+.donts{display:grid; grid-template-columns:repeat(2,1fr); gap:.9rem 1.5rem; margin-top:1.5rem;}
+@media (max-width:600px){ .donts{grid-template-columns:1fr;} }
+.donts li{display:flex; gap:.6rem; font-size:.92rem; align-items:flex-start;}
+.donts .x{flex-shrink:0; width:20px; height:20px; border-radius:50%; border:1.5px solid #B5533F; color:#B5533F; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700;}
+
+/* ---------- Colors ---------- */
+.swatches{display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; margin-top:1.5rem;}
+@media (max-width:760px){ .swatches{grid-template-columns:repeat(2,1fr);} }
+.swatch{border-radius:14px; overflow:hidden; border:1px solid var(--line);}
+.swatch .chip{height:96px;}
+.swatch .meta{padding:.85rem .95rem; background:var(--surface);}
+.swatch .name{font-weight:600; font-size:.85rem;}
+.swatch .role{font-size:.72rem; color:var(--ink-soft); margin-top:.1rem;}
+.swatch .hex{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.76rem; color:var(--ink-soft); margin-top:.35rem; font-variant-numeric:tabular-nums;}
+
+.ratio-bar{display:flex; height:34px; border-radius:8px; overflow:hidden; margin-top:1.75rem; border:1px solid var(--line);}
+.ratio-bar span{display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:600; color:#fff; letter-spacing:.02em;}
+
+/* ---------- Typography ---------- */
+.type-row{border:1px solid var(--line); border-radius:14px; padding:1.75rem; margin-top:1.25rem; background:var(--surface);}
+.type-row + .type-row{margin-top:1.25rem;}
+.type-label{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1rem; flex-wrap:wrap; gap:.5rem;}
+.type-label .name{font-weight:600; font-size:.85rem; letter-spacing:.04em; text-transform:uppercase; color:var(--accent);}
+.type-label .role{font-size:.82rem; color:var(--ink-soft);}
+.specimen-display{font-family:var(--font-display); font-weight:700; font-size:clamp(1.6rem,4vw,2.3rem); line-height:1.15;}
+.specimen-body{font-family:var(--font-body); font-size:1.05rem; max-width:56ch;}
+.specimen-script{font-family:var(--font-script); font-weight:600; font-size:clamp(1.5rem,3.6vw,2rem); color:var(--accent);}
+.weights{display:flex; gap:1.5rem; margin-top:.9rem; flex-wrap:wrap;}
+.weights span{font-size:.78rem; color:var(--ink-soft);}
+.weights b{display:block; font-family:var(--font-body); font-size:1rem; color:var(--ink); font-weight:400;}
+.weights .w500 b{font-weight:500;} .weights .w600 b{font-weight:600;}
+
+/* ---------- Icons & motif ---------- */
+.icon-row{display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:1.5rem;}
+.icon-card{display:flex; flex-direction:column; align-items:center; gap:.65rem; width:120px; text-align:center;}
+.icon-card span{font-size:.8rem; color:var(--ink-soft);}
+.divider-demo{display:flex; align-items:center; gap:.75rem; margin:2rem 0;}
+.divider-demo .line{flex:1; height:1px; background:var(--line);}
+.divider-demo .tick{width:6px; height:6px; border-radius:50%; background:var(--sand-fixed); border:1px solid var(--accent-soft);}
+.divider-demo .cap{font-size:.7rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-soft); white-space:nowrap;}
+
+/* ---------- Voice ---------- */
+.voice-compare{display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:1.5rem;}
+@media (max-width:640px){ .voice-compare{grid-template-columns:1fr;} }
+.voice-card{border-radius:14px; padding:1.5rem 1.6rem; border:1px solid var(--line);}
+.voice-card.yes{background:var(--surface);}
+.voice-card.no{background:var(--surface-2);}
+.voice-card .tag{font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;}
+.voice-card.yes .tag{color:var(--accent);}
+.voice-card.no .tag{color:#B5533F;}
+.voice-card p{margin:.65rem 0 0; font-size:.96rem;}
+
+/* ---------- Applications ---------- */
+.app-frame{border-radius:16px; overflow:hidden; border:1px solid var(--line); margin-top:1.5rem;}
+.app-frame img{width:100%; display:block;}
+.app-caption{font-size:.85rem; color:var(--ink-soft); margin-top:.75rem;}
+
+footer.colophon{padding:3rem clamp(1.5rem,4vw,4.5rem) 2rem; color:var(--ink-soft); font-size:.82rem; max-width:980px;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brandmark">
+      <div><span class="velo">VÉLO</span> <span class="briere">BRIÈRE</span></div>
+      <div class="sub">Charte graphique</div>
+    </div>
+    <nav class="nav" aria-label="Sommaire">
+      <a href="#univers"><span class="n">01</span>Notre univers</a>
+      <a href="#logo"><span class="n">02</span>Le logo</a>
+      <a href="#couleurs"><span class="n">03</span>Couleurs</a>
+      <a href="#typographie"><span class="n">04</span>Typographie</a>
+      <a href="#icones"><span class="n">05</span>Icônes &amp; motifs</a>
+      <a href="#image"><span class="n">06</span>Photo &amp; illustration</a>
+      <a href="#ton"><span class="n">07</span>Ton de voix</a>
+      <a href="#applications"><span class="n">08</span>Applications</a>
+    </nav>
+    <div class="sidebar-foot">Location &amp; livraison de vélos électriques<br>Presqu'île de Guérande &amp; Brière</div>
+  </aside>
+
+  <main>
+    <section class="section hero" id="univers">
+      <div class="hero-arc" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="hero-tag">Identité de marque — v1.0</p>
+        <div class="hero-word">
+          <span class="l1">VÉLO</span>
+          <span class="l2">BRIÈRE</span>
+        </div>
+        <p class="hero-script">Votre vélo livré au cœur de la Brière</p>
+        <p class="lede" style="text-align:center; margin-top:.5rem;">
+          Vélo Brière loue et livre des vélos électriques aux visiteurs du Parc naturel régional de Brière.
+          Cette charte fixe les règles d'usage du logo, des couleurs, des typographies et du ton qui font
+          reconnaître la marque, sur le web comme sur le terrain.
+        </p>
+      </div>
+      <div class="pillars">
+        <div class="pillar">
+          <div class="badge b-sage" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4-1-7-4.5-7-9 0-4 3-8 7-9 4 1 7 5 7 9 0 4.5-3 8-7 9Z"/><path d="M12 21V9"/></svg>
+          </div>
+          <span>Nature</span>
+        </div>
+        <div class="pillar">
+          <div class="badge b-sand" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="17" r="3.2"/><circle cx="18" cy="17" r="3.2"/><path d="M6 17 10 9h4l4 8M10 9 12 6h3"/></svg>
+          </div>
+          <span>Balade</span>
+        </div>
+        <div class="pillar">
+          <div class="badge b-pale" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+          </div>
+          <span>Découverte</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="logo">
+      <p class="eyebrow">02 — Symbole &amp; logotype</p>
+      <h2>Le logo</h2>
+      <p class="lede">Un symbole illustré posé sur un logotype en deux poids : il raconte le lieu (roseaux, oiseau en vol, vélo) avant même de lire le nom.</p>
+      <div class="logo-grid">
+        <div class="logo-frame">
+          <img src="./assets/logo-velo-briere.jpeg" alt="Logo Vélo Brière : vélo électrique entre les roseaux sous un arc, avec le logotype VÉLO BRIÈRE">
+        </div>
+        <ul class="construction-list">
+          <li><span class="dot"></span><span><strong>L'arc</strong> — un demi-cercle fin qui cadre la scène comme un horizon ; c'est le seul motif à réutiliser isolément dans les décors de marque.</span></li>
+          <li><span class="dot"></span><span><strong>La roselière</strong> — deux touffes de roseaux qui encadrent le vélo, toujours en vert olive, jamais en couleur pleine du logotype.</span></li>
+          <li><span class="dot"></span><span><strong>L'oiseau en vol</strong> — silhouette pleine en noir/vert très sombre, positionnée en haut de l'arc, jamais retournée ni dupliquée.</span></li>
+          <li><span class="dot"></span><span><strong>Le vélo électrique</strong> — élément central, cadre bas et batterie visibles ; c'est le seul élément qui peut être utilisé seul comme favicon ou avatar social.</span></li>
+          <li><span class="dot"></span><span><strong>Le logotype</strong> — « VÉLO » en capitales pleines et grasses (vert forêt), « BRIÈRE » en dessous, plus fin et très espacé (vert roseau).</span></li>
+          <li><span class="dot"></span><span><strong>La signature</strong> — « Location de vélos électriques » en petites capitales espacées, toujours présente sous le logotype dans les usages institutionnels.</span></li>
+        </ul>
+      </div>
+
+      <h3>Espace de protection &amp; taille minimale</h3>
+      <p>Laisser autour du symbole une marge libre au moins égale à la hauteur du « É » de VÉLO — aucun texte, bord de carte ou photo ne doit entrer dans cette zone. En dessous de 28&nbsp;px à l'écran ou 15&nbsp;mm en impression, utiliser le vélo seul plutôt que le lockup complet : le logotype devient illisible.</p>
+
+      <h3>Déclinaisons couleur</h3>
+      <div class="lockup-row">
+        <div class="lockup on-cream">
+          <span class="mini">VÉLO</span>
+          <span class="mini2">BRIÈRE</span>
+          <span class="cap">Version principale — fond clair (Blanc Brume)</span>
+        </div>
+        <div class="lockup on-forest">
+          <span class="mini">VÉLO</span>
+          <span class="mini2">BRIÈRE</span>
+          <span class="cap">Version inversée — fond Vert Rivière (cartes, packaging)</span>
+        </div>
+      </div>
+
+      <h3>À éviter</h3>
+      <ul class="donts">
+        <li><span class="x">✕</span>Étirer, incliner ou faire pivoter le symbole ou le logotype.</li>
+        <li><span class="x">✕</span>Recolorer le logo hors de la palette de marque.</li>
+        <li><span class="x">✕</span>Séparer « VÉLO » de « BRIÈRE » ou changer leur hiérarchie de poids.</li>
+        <li><span class="x">✕</span>Poser la version claire sur une photo ou un fond chargé sans plaque de couleur unie derrière.</li>
+        <li><span class="x">✕</span>Ajouter une ombre portée, un contour ou un effet 3D.</li>
+        <li><span class="x">✕</span>Recomposer le symbole (déplacer l'oiseau, dupliquer les roseaux, etc.).</li>
+      </ul>
+    </section>
+
+    <section class="section" id="couleurs">
+      <p class="eyebrow">03 — Palette</p>
+      <h2>Couleurs</h2>
+      <p class="lede">Une palette de marais : verts profonds, sable et lumière du ciel breton. Le Blanc Brume reste toujours la couleur dominante — les autres teintes ponctuent, elles ne couvrent jamais un fond entier de texte.</p>
+      <div class="swatches">
+        <div class="swatch">
+          <div class="chip" style="background:#2F6F4F;"></div>
+          <div class="meta"><div class="name">Vert Rivière</div><div class="role">Primaire — logotype, CTA, titres</div><div class="hex">#2F6F4F</div></div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#7DA17A;"></div>
+          <div class="meta"><div class="name">Vert Roseau</div><div class="role">Secondaire — accents, icônes</div><div class="hex">#7DA17A</div></div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#E6D3A3;"></div>
+          <div class="meta"><div class="name">Sable Brière</div><div class="role">Accent — badges, séparateurs</div><div class="hex">#E6D3A3</div></div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#F5F2E9;"></div>
+          <div class="meta"><div class="name">Blanc Brume</div><div class="role">Fond dominant</div><div class="hex">#F5F2E9</div></div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background:#1F1F1F;"></div>
+          <div class="meta"><div class="name">Noir Tourbe</div><div class="role">Texte &amp; encre</div><div class="hex">#1F1F1F</div></div>
+        </div>
+      </div>
+      <div class="ratio-bar" role="img" aria-label="Répartition indicative : 50% Blanc Brume, 25% Vert Rivière, 15% Vert Roseau, 7% Sable Brière, 3% Noir Tourbe">
+        <span style="width:50%; background:#F5F2E9; color:#1F1F1F;">50%</span>
+        <span style="width:25%; background:#2F6F4F;">25%</span>
+        <span style="width:15%; background:#7DA17A;">15%</span>
+        <span style="width:7%; background:#E6D3A3; color:#1F1F1F;">7%</span>
+        <span style="width:3%; background:#1F1F1F;">3%</span>
+      </div>
+      <p class="grid-note">Répartition indicative d'une page type : le Blanc Brume domine, le Vert Rivière porte les titres et boutons, le Vert Roseau habille les icônes et fonds de badges, le Sable Brière ponctue (séparateurs, surlignage), le Noir Tourbe sert uniquement au texte courant — jamais en aplat.</p>
+    </section>
+
+    <section class="section" id="typographie">
+      <p class="eyebrow">04 — Typographie</p>
+      <h2>Typographie</h2>
+      <p class="lede">Trois rôles, trois familles. On ne mélange pas : Poppins porte l'identité, Work Sans porte l'information, Caveat porte l'émotion — et seulement elle.</p>
+
+      <div class="type-row">
+        <div class="type-label"><span class="name">Poppins</span><span class="role">Titres &amp; logotype</span></div>
+        <div class="specimen-display">Location &amp; livraison<br>de vélos électriques</div>
+        <div class="weights">
+          <span class="w600">SemiBold 600<b>Sous-titres, boutons</b></span>
+          <span class="w600" style="font-weight:700;">Bold 700<b style="font-weight:700;">Titres, logotype</b></span>
+        </div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-label"><span class="name">Work Sans</span><span class="role">Texte courant &amp; interface</span></div>
+        <p class="specimen-body">Nous livrons et reprenons vos vélos directement à votre hébergement. Vélos entretenus, confortables et adaptés à tous, avec une assistance 7j/7 sur la Presqu'île de Guérande et en Brière.</p>
+        <div class="weights">
+          <span>Regular 400<b>Paragraphes, descriptions</b></span>
+          <span class="w500">Medium 500<b>Libellés, navigation</b></span>
+          <span class="w600">SemiBold 600<b>Boutons, prix, mises en avant</b></span>
+        </div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-label"><span class="name">Caveat</span><span class="role">Accent émotionnel — usage rare</span></div>
+        <p class="specimen-script">Explorez la Brière autrement</p>
+        <p class="grid-note" style="margin-top:.75rem;">Réservée aux accroches courtes (une ligne, jamais un paragraphe) : titre de section immersive, carte postale, légende photo. Ne jamais l'utiliser pour un bouton, un prix ou un texte de plus de 6 mots.</p>
+      </div>
+    </section>
+
+    <section class="section" id="icones">
+      <p class="eyebrow">05 — Icônes &amp; motifs</p>
+      <h2>Icônes &amp; motifs graphiques</h2>
+      <p class="lede">Un seul style de picto — trait fin, angles arrondis — posé dans un badge circulaire en alternance de fonds de la palette. Jamais d'icônes pleines ou d'un autre style (flat, 3D, emoji).</p>
+      <div class="icon-row">
+        <div class="icon-card">
+          <div class="badge b-sage" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="13" height="8" rx="1.5"/><path d="M16 11h3l2 2.5V16h-5"/><circle cx="7.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></div>
+          <span>Livraison</span>
+        </div>
+        <div class="icon-card">
+          <div class="badge b-sand" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="17" r="3.2"/><circle cx="18" cy="17" r="3.2"/><path d="M6 17 10 9h4l4 8M10 9 12 6h3"/></svg></div>
+          <span>Vélos</span>
+        </div>
+        <div class="icon-card">
+          <div class="badge b-pale" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M4.5 8 7 9.5M19.5 8 17 9.5M4 16h16M6 20h12"/><path d="M9 16a3 3 0 0 1 6 0"/></svg></div>
+          <span>Assistance</span>
+        </div>
+        <div class="icon-card">
+          <div class="badge b-sage" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg></div>
+          <span>Itinéraires</span>
+        </div>
+      </div>
+
+      <h3>Motifs de séparation</h3>
+      <div class="divider-demo"><span class="cap">Titre de section</span><span class="line"></span><span class="tick"></span></div>
+      <p class="grid-note">Une ligne fine avec un point sable centré ou en fin de course : c'est la seule ornementation de séparation autorisée entre deux blocs de contenu.</p>
+    </section>
+
+    <section class="section" id="image">
+      <p class="eyebrow">06 — Photo &amp; illustration</p>
+      <h2>Photographie &amp; illustration</h2>
+      <p class="lede">Deux registres qui ne se mélangent jamais dans une même composition.</p>
+      <h3>Illustration</h3>
+      <p>Réservée au symbole et aux pictos : formes vectorielles simples, palette de marque stricte, aucune illustration décorative ailleurs sur le site ou les supports.</p>
+      <h3>Photographie</h3>
+      <p>Toujours en extérieur et en lumière naturelle : chemins de halage, canaux, marais, cyclistes vus de dos ou de trois-quarts, jamais posés face caméra en studio. Étalonnage discret vers les verts et les sables de la palette, sans filtre saturé ni noir et blanc.</p>
+    </section>
+
+    <section class="section" id="ton">
+      <p class="eyebrow">07 — Ton de voix</p>
+      <h2>Ton de voix</h2>
+      <p class="lede">On vouvoie le visiteur, on nomme toujours le territoire, on va droit au bénéfice — jamais de jargon technique ou de superlatifs vides.</p>
+      <div class="voice-compare">
+        <div class="voice-card yes">
+          <span class="tag">On dit</span>
+          <p>« Votre vélo livré au cœur de la Brière. »</p>
+        </div>
+        <div class="voice-card no">
+          <span class="tag">On évite</span>
+          <p>« Bénéficiez d'une solution de mobilité douce optimale. »</p>
+        </div>
+        <div class="voice-card yes">
+          <span class="tag">On dit</span>
+          <p>« Nous livrons et reprenons vos vélos directement à votre hébergement. »</p>
+        </div>
+        <div class="voice-card no">
+          <span class="tag">On évite</span>
+          <p>« Livraison et récupération assurées par nos équipes. » (froid, sans « vous »)</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="applications">
+      <p class="eyebrow">08 — Applications</p>
+      <h2>Le système en usage</h2>
+      <p class="lede">Palette, typographies et pictos appliqués aux supports réels de Vélo Brière : cartes de visite, site de réservation, réseaux sociaux.</p>
+      <div class="app-frame">
+        <img src="./assets/moodboard-velo-briere.png" alt="Planche d'application de la charte Vélo Brière : logo, univers de marque, palette, cartes de visite et page d'accueil du site">
+      </div>
+      <p class="app-caption">La version inversée n'apparaît que sur fond Vert Rivière plein (cartes, bandeau de pied de page). Le site garde le Blanc Brume en fond dominant, avec le Vert Rivière réservé aux boutons d'action et aux titres.</p>
+    </section>
+
+    <footer class="colophon">
+      Vélo Brière — Charte graphique v1.0 · 135 Kermouraud, 44410 Saint-Lyphard<br>
+      Document de référence interne : à faire suivre à toute personne créant un support pour la marque.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
