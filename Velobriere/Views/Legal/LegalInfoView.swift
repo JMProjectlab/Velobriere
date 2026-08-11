@@ -79,6 +79,17 @@ struct LegalInfoView: View {
                     .font(Theme.Fonts.body(14, weight: .semibold))
                     .foregroundStyle(Theme.Colors.primaryStrong)
             }
+            // Le chemin suit le nom du dépôt GitHub Pages : il changerait si le
+            // dépôt était renommé.
+            Link(destination: Self.websiteURL) {
+                HStack(spacing: 5) {
+                    Text("Réserver sur le site")
+                        .font(Theme.Fonts.body(14, weight: .semibold))
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundStyle(Theme.Colors.primaryStrong)
+            }
         }
         .padding(Theme.Spacing.md)
         .background(Theme.Colors.surface)
@@ -88,4 +99,7 @@ struct LegalInfoView: View {
                 .stroke(Theme.Colors.line, lineWidth: 1)
         )
     }
+
+    /// `URL(string:)` ne peut pas échouer sur une constante littérale.
+    private static let websiteURL = URL(string: "https://jmprojectlab.github.io/Velobriere/")!
 }
