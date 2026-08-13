@@ -9,6 +9,8 @@ struct MyReservationsView: View {
     /// Réservation déjà annulée que l'on retire de la liste.
     @State private var reservationToDelete: Reservation?
     @State private var resultMessage: String?
+    @EnvironmentObject private var session: AccountSession
+    @State private var showAccount = false
 
     private let paymentService: PaymentService = SimulatedPaymentService()
 
@@ -52,6 +54,21 @@ struct MyReservationsView: View {
             }
             .background(Theme.Colors.background)
             .navigationTitle("Mes réservations")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAccount = true
+                    } label: {
+                        Label(session.estConnecte ? "Mon compte" : "Se connecter",
+                              systemImage: session.estConnecte
+                                ? "person.crop.circle.fill"
+                                : "person.crop.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showAccount) {
+                AccountView().environmentObject(session)
+            }
             .navigationDestination(for: UUID.self) { id in
                 ReservationDetailView(reservationID: id)
             }

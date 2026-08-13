@@ -131,9 +131,22 @@ Pour activer le mode partagé sur iOS :
    **FirebaseFirestore**.
 2. Déposer `GoogleService-Info.plist` dans la cible (il est dans `.gitignore`,
    comme sur Scornade : il ne part pas sur le dépôt).
-3. Il reste à écrire l'écran de connexion iOS : `estPartage` exige
-   `Auth.auth().currentUser != nil`. Sans connexion, l'app reste en mode local
-   — c'est le dernier maillon manquant.
+3. L'écran de connexion existe (`AccountView`, accessible depuis l'onglet
+   Réservations). Le compte y est **facultatif** : réserver, consulter et
+   annuler fonctionnent sans, en local. Se connecter ne fait qu'une chose, mais
+   elle est décisive — les réservations deviennent partagées avec le loueur.
+
+### Ce qui manque encore côté iOS
+
+L'app **écrit** dans Firestore une fois connectée, mais elle n'en **lit** pas
+encore : il n'y a pas d'écoute temps réel comme côté web
+(`VB.Remote.watchReservations`). Conséquence : un client qui se connecte depuis
+un nouvel iPhone ne retrouve pas ses réservations passées, et le loueur ne voit
+pas depuis l'app iOS celles créées ailleurs.
+
+C'est le dernier maillon. À faire après avoir vérifié le modèle de données en
+conditions réelles sur le web — inutile de porter une deuxième fois une forme
+de document qui bougerait encore.
 
 `ReservationStore.validate(_:)` et `VB.validateDraft()` restent utiles après la
 bascule : ils donnent un message immédiat sans aller-retour réseau. Ils cessent
