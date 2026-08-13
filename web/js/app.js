@@ -203,10 +203,23 @@ VB.askCancel = id => {
   });
 };
 
-VB.doCancel = id => {
+VB.doCancel = async id => {
   VB.closeDialog();
   const r = VB.reservationById(id);
   if (!r) return;
+
+  // En mode Firebase, l'annulation rend les vélos au stock dans la même
+  // transaction qui marque la réservation annulée. Si elle échoue, on
+  // n'émet aucun avoir : mieux vaut ne rien faire qu'un remboursement
+  // pour une réservation restée active côté serveur.
+  if (VB.Remote?.active && VB.Accounts.currentId()) {
+    try {
+      await VB.Remote.cancelReservation(r);
+    } catch (error) {
+      VB.notify("Annulation impossible : " + (error?.message || 'réessayez dans un instant.'));
+      return;
+    }
+  }
 
   const fee = VB.cancellationFee(r.totalPrice, r.start);
   const refund = VB.cancellationRefund(r.totalPrice, r.start);
@@ -220,6 +233,10 @@ VB.doCancel = id => {
   r.creditNoteNumber = creditNote ? creditNote.number : null;
   if (r.paymentStatus === 'paid') r.paymentStatus = 'refunded';
   VB.saveReservations();
+  if (VB.Remote?.active && VB.Accounts.currentId()) {
+    // Le détail comptable de l'annulation (frais, avoir) rejoint le serveur.
+    VB.Remote.updateReservation(r).catch(e => console.warn('[VB] Avoir non synchronisé :', e));
+  }
   VB.render();
   VB.notify(VB.cancellationResultMessage(fee, refund, creditNote ? creditNote.number : null));
 };
@@ -296,22 +313,43 @@ VB.pay = async method => {
     cancelledAt: null, cancellationFee: null, refundedAmount: null, creditNoteNumber: null
   };
 
-  // Dernier contrôle, après l'attente du paiement : c'est pendant cette
-  // attente que le stock peut avoir été pris. Aucune facture n'est émise si
-  // la réservation n'est pas enregistrable.
-  const lateProblem = VB.validateDraft(reservation);
-  if (lateProblem) {
-    VB.showPaymentProblem(
-      lateProblem + " Aucune réservation n'a été enregistrée et aucune facture n'a été émise."
-    );
-    return;
+  reservation.accountId = VB.Accounts.currentId();
+
+  // Enregistrement. En mode Firebase, c'est la transaction qui fait autorité :
+  // elle relit le stock au moment de l'écriture, donc deux réservations
+  // simultanées ne peuvent pas passer toutes les deux. Le contrôle local
+  // ci-dessous ne sert qu'à donner un message immédiat en mode hors-ligne.
+  if (VB.Remote?.active && VB.Accounts.currentId()) {
+    try {
+      await VB.Remote.commitReservation(reservation);
+    } catch (error) {
+      VB.showPaymentProblem(
+        (error?.message || 'Enregistrement impossible.')
+        + " Aucune réservation n'a été enregistrée et aucune facture n'a été émise."
+      );
+      return;
+    }
+  } else {
+    // Dernier contrôle, après l'attente du paiement : c'est pendant cette
+    // attente que le stock peut avoir été pris. Aucune facture n'est émise si
+    // la réservation n'est pas enregistrable.
+    const lateProblem = VB.validateDraft(reservation);
+    if (lateProblem) {
+      VB.showPaymentProblem(
+        lateProblem + " Aucune réservation n'a été enregistrée et aucune facture n'a été émise."
+      );
+      return;
+    }
   }
 
   const invoice = VB.issueInvoice(reservation, method);
   reservation.invoiceNumber = invoice.number;
-  reservation.accountId = VB.Accounts.currentId();
   VB.state.reservations.push(reservation);
   VB.saveReservations();
+  // La réservation distante porte désormais le numéro de facture.
+  if (VB.Remote?.active && VB.Accounts.currentId()) {
+    VB.Remote.updateReservation(reservation).catch(e => console.warn('[VB] Facture non synchronisée :', e));
+  }
   VB.navigate({ name: 'confirmation', reservation, invoice });
 };
 
@@ -650,6 +688,21 @@ VB.boot = () => {
       // d'authentification arrive, puis à chaque connexion ou déconnexion.
       VB.Remote.onAuthChanged(async user => {
         await VB.Accounts._onAuthChanged(user);
+
+        if (user) {
+          // À partir d'ici, le serveur fait autorité : les réservations
+          // affichées sont celles du compte, vues depuis n'importe quel
+          // appareil. C'est ce qui manquait pour que le client et le loueur
+          // regardent la même chose.
+          VB.Remote.watchReservations(list => {
+            VB.state.reservations = list;
+            VB.render();
+          });
+        } else {
+          // Déconnecté : retour aux réservations de ce navigateur.
+          VB.Remote.stopWatching();
+          VB.state.reservations = VB.loadReservations();
+        }
         VB.render();
       });
     })

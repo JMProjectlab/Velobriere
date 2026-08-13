@@ -239,6 +239,22 @@ VB.Remote = {
     });
   },
 
+  /**
+   * Met à jour le détail d'une réservation existante — numéro de facture,
+   * avoir, frais d'annulation — sans toucher aux compteurs.
+   *
+   * Les champs qui déterminent la disponibilité (taille, dates, quantité) sont
+   * figés à la création et les règles de sécurité refusent de les voir changer :
+   * seul le contenu comptable évolue.
+   */
+  async updateReservation(reservation) {
+    if (!this.active) return;
+    await mods.updateDoc(mods.doc(db, 'reservations', reservation.id), {
+      status: reservation.status,
+      payload: JSON.stringify(reservation)
+    });
+  },
+
   /** Annule une réservation et rend les vélos au stock, dans la même transaction. */
   async cancelReservation(reservation) {
     if (!this.active) throw new Error('Synchronisation indisponible.');

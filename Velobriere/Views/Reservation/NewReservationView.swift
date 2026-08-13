@@ -394,7 +394,32 @@ struct NewReservationView: View {
     }
 
     /// Enregistre la réservation payée, émet la facture et affiche la confirmation.
+    ///
+    /// En mode partagé, c'est la transaction Firestore qui fait autorité : elle
+    /// relit le stock au moment de l'écriture. Le contrôle local ne sert plus
+    /// qu'à donner un message immédiat quand le serveur n'est pas branché.
     private func finalise(_ reservation: Reservation, with result: PaymentResult) {
+        #if canImport(FirebaseFirestore)
+        if reservationStore.estPartage {
+            Task {
+                do {
+                    try await reservationStore.enregistrerDistant(reservation)
+                } catch {
+                    pendingReservation = nil
+                    validationMessage = error.localizedDescription
+                        + " Le paiement n'a pas été validé : aucune réservation n'a été enregistrée."
+                    return
+                }
+                // Le serveur a accepté : la réservation entre dans la liste
+                // locale sans repasser par la validation, qui ne voit qu'une
+                // copie partielle des réservations.
+                reservationStore.acceptFromServer(reservation)
+                completeAfterStorage(reservation, with: result)
+            }
+            return
+        }
+        #endif
+
         do {
             try reservationStore.add(reservation)
         } catch {
@@ -406,10 +431,26 @@ struct NewReservationView: View {
                 + " Le paiement n'a pas été validé : aucune réservation n'a été enregistrée."
             return
         }
+        completeAfterStorage(reservation, with: result)
+    }
+
+    /// Émission de la facture et affichage de la confirmation, une fois la
+    /// réservation acquise — localement ou côté serveur.
+    private func completeAfterStorage(_ reservation: Reservation, with result: PaymentResult) {
         let invoice = invoiceStore.issueInvoice(for: reservation, method: result.method)
         reservationStore.markPaid(reservation.id, result: result, invoiceNumber: invoice.number)
         pendingReservation = nil
-        createdReservation = reservationStore.reservation(withID: reservation.id) ?? reservation
+        let stored = reservationStore.reservation(withID: reservation.id) ?? reservation
+        createdReservation = stored
+
+        #if canImport(FirebaseFirestore)
+        // Le numéro de facture et l'encaissement rejoignent le serveur. Un
+        // échec ici ne remet pas la réservation en cause : elle est déjà
+        // enregistrée et le stock déjà pris.
+        if reservationStore.estPartage {
+            Task { try? await reservationStore.mettreAJourDistant(stored) }
+        }
+        #endif
     }
 
     private func buildReservation() -> Reservation {

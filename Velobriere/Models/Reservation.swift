@@ -81,6 +81,13 @@ enum ReservationError: LocalizedError, Equatable {
     /// Le stock de la taille demandée est insuffisant sur au moins un jour de
     /// la période.
     case notEnoughUnits(available: Int, requested: Int)
+    /// Mode partagé : personne n'est connecté, la réservation ne peut pas être
+    /// rattachée à un compte.
+    case notSignedIn
+    /// Mode partagé : la taille demandée n'a pas de compteur côté serveur.
+    case unknownVariant
+    /// Mode partagé : le serveur a refusé l'écriture.
+    case remote(String)
 
     var errorDescription: String? {
         switch self {
@@ -96,6 +103,12 @@ enum ReservationError: LocalizedError, Equatable {
             }
             return "Il ne reste que \(available) vélo\(available > 1 ? "s" : "") de cette taille "
                  + "sur la période choisie, pour \(requested) demandé\(requested > 1 ? "s" : "")."
+        case .notSignedIn:
+            return "Connectez-vous pour enregistrer votre réservation."
+        case .unknownVariant:
+            return "Cette taille de vélo n'est pas configurée. Contactez le loueur."
+        case .remote(let message):
+            return message
         }
     }
 }

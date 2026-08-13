@@ -66,15 +66,25 @@ service cloud.firestore {
         && request.resource.data.endDay is string
         && request.resource.data.startDay <= request.resource.data.endDay;
 
-      // Un client peut annuler la sienne, rien d'autre : l'identité, les dates
-      // et la quantité sont figées après création. Toute autre modification
-      // (encaissement, avoir) passe par le loueur.
+      // Ce qui détermine la disponibilité — taille, dates, quantité — est figé
+      // à la création : sans cela, on pourrait rallonger une location sans
+      // repasser par le compteur. Le reste (statut, détail comptable dans
+      // `payload`) appartient au client.
+      //
+      // Le statut ne peut qu'aller vers « annulé » ou rester tel quel : sans
+      // cette borne, un client pourrait annuler — ce qui rend les vélos au
+      // stock — puis se remettre en « confirmé » sans les reprendre.
       allow update: if estLoueur()
         || (proprietaire(resource.data.uid)
+            && request.resource.data.uid == resource.data.uid
+            && request.resource.data.variantId == resource.data.variantId
+            && request.resource.data.startDay == resource.data.startDay
+            && request.resource.data.endDay == resource.data.endDay
+            && request.resource.data.quantity == resource.data.quantity
             && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['status', 'cancelledAt', 'cancellationFee',
-                           'refundedAmount', 'creditNoteNumber', 'paymentStatus'])
-            && request.resource.data.status == 'cancelled');
+                 .hasOnly(['status', 'payload'])
+            && (request.resource.data.status == resource.data.status
+                || request.resource.data.status == 'cancelled'));
 
       // On n'efface pas une réservation : on l'annule. L'historique comptable
       // doit rester consultable.

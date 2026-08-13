@@ -16,7 +16,7 @@ est terminé.
 |---|---|
 | 1. Fondation : modèle de données, règles de sécurité, couche Firestore web | **Faite** |
 | 2. Comptes : `VB.Accounts` bascule sur Firebase Auth | **Faite** |
-| 3. Bascule des écritures de réservation, puis portage iOS | à faire |
+| 3. Bascule des écritures de réservation, web et iOS | **Faite** (Swift non compilé) |
 
 Tant que `web/js/firebase-config.js` n'est pas renseigné, le site fonctionne
 exactement comme avant : `VB.Remote.init()` ne télécharge rien, `VB.Accounts`
@@ -112,21 +112,43 @@ method → Adresse e-mail / Mot de passe**, sinon toute inscription échouera.
 
 ---
 
-## Étape 3 — les écritures et iOS
+## Étape 3 — les écritures et iOS (faite)
 
-Une fois les comptes en place :
+**Web.** Création et annulation passent par les transactions de `VB.Remote` dès
+qu'un compte est connecté. Les réservations affichées viennent de Firestore, en
+écoute temps réel : le client et le loueur voient enfin la même chose, depuis
+n'importe quel appareil. Sans compte connecté, tout retombe sur le mode local.
 
-- côté web, faire passer la création de réservation par
-  `VB.Remote.commitReservation()` au lieu de `VB.state.reservations.push()`, et
-  l'annulation par `VB.Remote.cancelReservation()` ;
-- côté iOS, ajouter le paquet Firebase (Xcode → *Add Package Dependencies* →
-  `https://github.com/firebase/firebase-ios-sdk`, produits *FirebaseAuth* et
-  *FirebaseFirestore*), déposer `GoogleService-Info.plist` dans la cible, et
-  porter la même transaction dans `ReservationStore`.
+**iOS.** `ReservationStore` gagne les mêmes transactions, encadrées par
+`#if canImport(FirebaseFirestore)`. **Sans le paquet Firebase, ce code n'existe
+pas et le projet compile exactement comme avant** — rien n'est cassé tant que
+tu n'as pas fait la manipulation ci-dessous.
+
+Pour activer le mode partagé sur iOS :
+
+1. Xcode → *File → Add Package Dependencies* →
+   `https://github.com/firebase/firebase-ios-sdk`, produits **FirebaseAuth** et
+   **FirebaseFirestore**.
+2. Déposer `GoogleService-Info.plist` dans la cible (il est dans `.gitignore`,
+   comme sur Scornade : il ne part pas sur le dépôt).
+3. Il reste à écrire l'écran de connexion iOS : `estPartage` exige
+   `Auth.auth().currentUser != nil`. Sans connexion, l'app reste en mode local
+   — c'est le dernier maillon manquant.
 
 `ReservationStore.validate(_:)` et `VB.validateDraft()` restent utiles après la
 bascule : ils donnent un message immédiat sans aller-retour réseau. Ils cessent
 simplement d'être la seule protection.
+
+### L'ordre des opérations, et pourquoi il compte
+
+À l'annulation, le serveur est appelé **avant** la mise à jour locale. L'inverse
+laisserait une réservation annulée sur l'appareil mais toujours active côté
+serveur : un vélo bloqué pour rien, invisible depuis l'app.
+
+À la réservation, c'est le contraire : le serveur écrit d'abord, et la
+réservation n'entre dans la liste locale qu'ensuite, sans repasser par la
+validation — la décision du serveur fait autorité, et la copie locale est
+partielle.
 
 ---
 
