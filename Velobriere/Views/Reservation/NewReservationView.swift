@@ -356,6 +356,16 @@ struct NewReservationView: View {
             return
         }
 
+        // Dernier contrôle avant d'ouvrir le paiement : c'est le magasin qui
+        // détient la règle, et lui seul voit l'état réel des réservations au
+        // moment du clic. Mieux vaut refuser ici qu'après avoir encaissé.
+        do {
+            try reservationStore.validate(buildReservation())
+        } catch {
+            validationMessage = error.localizedDescription
+            return
+        }
+
         submit()
     }
 
@@ -385,7 +395,17 @@ struct NewReservationView: View {
 
     /// Enregistre la réservation payée, émet la facture et affiche la confirmation.
     private func finalise(_ reservation: Reservation, with result: PaymentResult) {
-        reservationStore.add(reservation)
+        do {
+            try reservationStore.add(reservation)
+        } catch {
+            // Le stock a changé entre l'ouverture du paiement et son
+            // aboutissement. Aucune facture n'est émise et rien n'est
+            // enregistré : le paiement devra être remboursé côté loueur.
+            pendingReservation = nil
+            validationMessage = (error.localizedDescription)
+                + " Le paiement n'a pas été validé : aucune réservation n'a été enregistrée."
+            return
+        }
         let invoice = invoiceStore.issueInvoice(for: reservation, method: result.method)
         reservationStore.markPaid(reservation.id, result: result, invoiceNumber: invoice.number)
         pendingReservation = nil

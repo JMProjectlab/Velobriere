@@ -63,3 +63,39 @@ struct Reservation: Identifiable, Codable {
         return "\(bikeName) — taille \(variantLabel)"
     }
 }
+
+/// Les raisons pour lesquelles une réservation peut être refusée à
+/// l'enregistrement par `ReservationStore.validate(_:)`.
+///
+/// Ces cas sont normalement écartés par l'écran de saisie, qui désactive le
+/// bouton et affiche un message. Ils existent quand même parce qu'un écran peut
+/// évoluer, se tromper, ou être contourné : la règle appartient au magasin,
+/// l'écran ne fait que l'anticiper pour le confort de l'utilisateur.
+enum ReservationError: LocalizedError, Equatable {
+    /// La date de fin précède la date de début.
+    case invalidDateRange
+    /// La location commencerait avant aujourd'hui.
+    case startsInThePast
+    /// Quantité nulle ou négative.
+    case invalidQuantity
+    /// Le stock de la taille demandée est insuffisant sur au moins un jour de
+    /// la période.
+    case notEnoughUnits(available: Int, requested: Int)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidDateRange:
+            return "La date de fin doit être postérieure à la date de début."
+        case .startsInThePast:
+            return "La période choisie commence dans le passé."
+        case .invalidQuantity:
+            return "Le nombre de vélos doit être d'au moins un."
+        case .notEnoughUnits(let available, let requested):
+            if available <= 0 {
+                return "Plus aucun vélo de cette taille n'est disponible sur la période choisie."
+            }
+            return "Il ne reste que \(available) vélo\(available > 1 ? "s" : "") de cette taille "
+                 + "sur la période choisie, pour \(requested) demandé\(requested > 1 ? "s" : "")."
+        }
+    }
+}

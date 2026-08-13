@@ -13,10 +13,50 @@ final class ReservationStore: ObservableObject {
         load()
     }
 
-    func add(_ reservation: Reservation) {
+    /// Enregistre une réservation après avoir vérifié qu'elle est recevable.
+    ///
+    /// La vérification vit ici, et pas seulement dans l'écran de saisie : c'est
+    /// le magasin qui détient l'invariant *« la somme des quantités réservées
+    /// pour une taille, un jour donné, ne dépasse jamais le stock »*. Un écran
+    /// peut oublier de vérifier ; le magasin, non. Le jour où les réservations
+    /// passeront par un serveur, c'est exactement ce contrôle qui devra devenir
+    /// une transaction — il est déjà écrit au bon endroit.
+    ///
+    /// - Important: contrôle **local**. Deux appareils différents ne voient pas
+    ///   les réservations l'un de l'autre tant qu'il n'y a pas de backend
+    ///   partagé : cette vérification est nécessaire, elle n'est pas suffisante.
+    func add(_ reservation: Reservation) throws {
+        try validate(reservation)
         reservations.append(reservation)
         reservations.sort { $0.startDate < $1.startDate }
         save()
+    }
+
+    /// Vérifie qu'une réservation peut être enregistrée. Lève `ReservationError`
+    /// sinon.
+    func validate(_ reservation: Reservation, now: Date = .now) throws {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: reservation.startDate)
+        let end = calendar.startOfDay(for: reservation.endDate)
+
+        guard start <= end else { throw ReservationError.invalidDateRange }
+        guard start >= calendar.startOfDay(for: now) else { throw ReservationError.startsInThePast }
+        guard reservation.quantity > 0 else { throw ReservationError.invalidQuantity }
+
+        let bike = BikeCatalog.all.first { $0.id == reservation.bikeId } ?? BikeCatalog.eActv100
+        let variant = bike.variants.first { $0.id == reservation.variantId }
+
+        // La disponibilité se calcule sans la réservation examinée : sans cela,
+        // revalider une réservation déjà enregistrée la compterait deux fois.
+        let others = reservations.filter { $0.id != reservation.id }
+        let available = Self.availableUnits(among: others,
+                                            for: bike,
+                                            variant: variant,
+                                            from: start,
+                                            to: end)
+        guard reservation.quantity <= available else {
+            throw ReservationError.notEnoughUnits(available: available, requested: reservation.quantity)
+        }
     }
 
     /// Retire une réservation de la liste. Réservé aux réservations déjà
@@ -67,6 +107,28 @@ final class ReservationStore: ObservableObject {
     /// Nombre de vélos déjà réservés (hors annulations) pour un jour donné.
     /// `variantId` à `nil` compte toutes les tailles.
     func reservedQuantity(bikeId: String, variantId: String?, on day: Date) -> Int {
+        Self.reservedQuantity(among: reservations, bikeId: bikeId, variantId: variantId, on: day)
+    }
+
+    /// Vélos encore disponibles pour un jour donné, dans la taille demandée.
+    func availableUnits(for bike: Bike, variant: BikeVariant? = nil, on day: Date) -> Int {
+        Self.availableUnits(among: reservations, for: bike, variant: variant, on: day)
+    }
+
+    /// Disponibilité minimale sur toute la période demandée (le jour le plus chargé fait foi).
+    func availableUnits(for bike: Bike, variant: BikeVariant? = nil, from startDate: Date, to endDate: Date) -> Int {
+        Self.availableUnits(among: reservations, for: bike, variant: variant, from: startDate, to: endDate)
+    }
+
+    // Les versions statiques prennent la liste en paramètre : `validate(_:)` a
+    // besoin de calculer la disponibilité **en excluant** la réservation qu'il
+    // examine, ce que les méthodes d'instance ne permettent pas. Une seule
+    // implémentation, deux points d'entrée.
+
+    static func reservedQuantity(among reservations: [Reservation],
+                                 bikeId: String,
+                                 variantId: String?,
+                                 on day: Date) -> Int {
         let calendar = Calendar.current
         let day = calendar.startOfDay(for: day)
         return reservations
@@ -76,23 +138,35 @@ final class ReservationStore: ObservableObject {
             .reduce(0) { $0 + $1.quantity }
     }
 
-    /// Vélos encore disponibles pour un jour donné, dans la taille demandée.
-    func availableUnits(for bike: Bike, variant: BikeVariant? = nil, on day: Date) -> Int {
+    static func availableUnits(among reservations: [Reservation],
+                               for bike: Bike,
+                               variant: BikeVariant? = nil,
+                               on day: Date) -> Int {
         let capacity = variant?.units ?? bike.totalUnits
-        return max(0, capacity - reservedQuantity(bikeId: bike.id, variantId: variant?.id, on: day))
+        let reserved = reservedQuantity(among: reservations,
+                                        bikeId: bike.id,
+                                        variantId: variant?.id,
+                                        on: day)
+        return max(0, capacity - reserved)
     }
 
-    /// Disponibilité minimale sur toute la période demandée (le jour le plus chargé fait foi).
-    func availableUnits(for bike: Bike, variant: BikeVariant? = nil, from startDate: Date, to endDate: Date) -> Int {
+    static func availableUnits(among reservations: [Reservation],
+                               for bike: Bike,
+                               variant: BikeVariant? = nil,
+                               from startDate: Date,
+                               to endDate: Date) -> Int {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: startDate)
         let end = calendar.startOfDay(for: endDate)
-        guard start <= end else { return availableUnits(for: bike, variant: variant, on: start) }
+        guard start <= end else {
+            return availableUnits(among: reservations, for: bike, variant: variant, on: start)
+        }
 
         var minAvailable = Int.max
         var day = start
         while day <= end {
-            minAvailable = min(minAvailable, availableUnits(for: bike, variant: variant, on: day))
+            minAvailable = min(minAvailable,
+                               availableUnits(among: reservations, for: bike, variant: variant, on: day))
             guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
             day = next
         }

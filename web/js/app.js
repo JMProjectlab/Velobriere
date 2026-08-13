@@ -254,8 +254,23 @@ VB.refreshCardButton = () => {
 VB.pay = async method => {
   if (method === 'card' && !VB.isCardFormValid()) return;
 
+  // Avant d'encaisser : le stock a pu changer depuis l'ouverture du
+  // formulaire. Refuser ici coûte un message ; refuser après avoir encaissé
+  // coûte un remboursement à faire à la main.
+  const problem = VB.validateDraft(VB.draft);
+  if (problem) {
+    VB.showPaymentProblem(problem);
+    return;
+  }
+
   const applePayBtn = document.getElementById('applePayBtn');
   const cardBtn = document.getElementById('payCardBtn');
+  // Les libellés sont dynamiques (« Payer 78,00 € ») : on les relève avant de
+  // les remplacer, pour pouvoir les remettre tels quels en cas de refus.
+  VB._payLabels = {
+    applePay: applePayBtn?.innerHTML ?? null,
+    card: cardBtn?.textContent ?? null
+  };
   [applePayBtn, cardBtn].forEach(b => { if (b) b.disabled = true; });
   if (method === 'applePay' && applePayBtn) applePayBtn.innerHTML = '<span class="spinner"></span>';
   else if (cardBtn) cardBtn.textContent = 'Paiement en cours…';
@@ -281,12 +296,50 @@ VB.pay = async method => {
     cancelledAt: null, cancellationFee: null, refundedAmount: null, creditNoteNumber: null
   };
 
+  // Dernier contrôle, après l'attente du paiement : c'est pendant cette
+  // attente que le stock peut avoir été pris. Aucune facture n'est émise si
+  // la réservation n'est pas enregistrable.
+  const lateProblem = VB.validateDraft(reservation);
+  if (lateProblem) {
+    VB.showPaymentProblem(
+      lateProblem + " Aucune réservation n'a été enregistrée et aucune facture n'a été émise."
+    );
+    return;
+  }
+
   const invoice = VB.issueInvoice(reservation, method);
   reservation.invoiceNumber = invoice.number;
   reservation.accountId = VB.Accounts.currentId();
   VB.state.reservations.push(reservation);
   VB.saveReservations();
   VB.navigate({ name: 'confirmation', reservation, invoice });
+};
+
+/** Affiche un refus au-dessus des boutons de paiement et les réactive. */
+VB.showPaymentProblem = message => {
+  const applePayBtn = document.getElementById('applePayBtn');
+  const cardBtn = document.getElementById('payCardBtn');
+  const labels = VB._payLabels || {};
+  if (applePayBtn) {
+    applePayBtn.disabled = false;
+    if (labels.applePay != null) applePayBtn.innerHTML = labels.applePay;
+  }
+  if (cardBtn) {
+    cardBtn.disabled = !VB.isCardFormValid();
+    if (labels.card != null) cardBtn.textContent = labels.card;
+  }
+
+  let slot = document.getElementById('paymentProblem');
+  if (!slot) {
+    slot = document.createElement('div');
+    slot.id = 'paymentProblem';
+    slot.className = 'notice notice-warning';
+    slot.setAttribute('role', 'alert');
+    const anchor = cardBtn || applePayBtn;
+    anchor?.parentNode?.insertBefore(slot, anchor);
+  }
+  slot.textContent = message;
+  slot.scrollIntoView({ block: 'center', behavior: 'smooth' });
 };
 
 
