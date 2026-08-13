@@ -639,6 +639,10 @@ VB.boot = () => {
   VB.bootstrapData();
   VB.bindEvents();
   VB.render();
+
+  // Sans `firebase-config.js` renseigné, cet appel ne télécharge rien et ne
+  // change rien : le site reste en mode local. Voir SETUP-FIREBASE.md.
+  VB.Remote?.init().catch(e => console.warn('[VB] Firebase indisponible :', e));
 };
 
 document.addEventListener('DOMContentLoaded', VB.boot);

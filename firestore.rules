@@ -1,0 +1,112 @@
+rules_version = '2';
+
+// Règles de sécurité Firestore — Vélo Brière
+//
+// Modèle de données
+// -----------------
+//   reservations/{id}       une réservation. Rattachée à un compte par `uid`.
+//   availability/{variantId} un seul document par taille de vélo :
+//                            { units: 2, days: { "2026-08-14": 1, ... } }
+//                            `days` compte les vélos pris ce jour-là.
+//   config/public            capacités et paramètres lisibles par tous.
+//
+// Le compteur `days` est ce qui rend la réservation sûre : la vérification et
+// l'incrément se font dans une seule transaction Firestore, sur un seul
+// document, donc deux réservations simultanées ne peuvent pas passer toutes
+// les deux. C'est l'équivalent de la contrainte d'exclusion qu'on aurait eue
+// gratuitement en SQL.
+//
+// LIMITE ASSUMÉE — à relire avant de vendre l'outil à un autre loueur
+// -------------------------------------------------------------------
+// Ces règles autorisent un client authentifié à écrire sa propre réservation
+// et à mettre à jour les compteurs. Un utilisateur malintentionné qui parlerait
+// directement à l'API pourrait donc fausser un compteur : les règles vérifient
+// la forme des données, pas la cohérence métier complète. Le seul moyen de
+// fermer cela est de passer les écritures par des Cloud Functions, ce qui exige
+// le plan Blaze (facturation à l'usage).
+//
+// Choix retenu pour l'instant : transactions côté client, plan gratuit. La
+// contrepartie est acceptable pour un loueur familial avec quatre vélos ; elle
+// ne le sera plus pour un client payant.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function estConnecte() {
+      return request.auth != null;
+    }
+
+    function proprietaire(uid) {
+      return estConnecte() && request.auth.uid == uid;
+    }
+
+    // Le loueur voit tout. L'identifiant est déposé à la main dans la console,
+    // dans config/admins, plutôt que codé ici : le changer ne doit pas demander
+    // de redéployer les règles.
+    function estLoueur() {
+      return estConnecte()
+        && exists(/databases/$(database)/documents/config/admins)
+        && request.auth.uid in get(/databases/$(database)/documents/config/admins).data.uids;
+    }
+
+    // ---- Réservations ----
+    match /reservations/{reservationId} {
+      // Un client ne lit que les siennes ; le loueur lit tout.
+      allow read: if proprietaire(resource.data.uid) || estLoueur();
+
+      // À la création, on impose que la réservation soit signée par son auteur
+      // et qu'elle contienne les champs sans lesquels la disponibilité ne peut
+      // pas être recalculée.
+      allow create: if proprietaire(request.resource.data.uid)
+        && request.resource.data.keys().hasAll(
+             ['uid', 'variantId', 'startDay', 'endDay', 'quantity', 'status'])
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity > 0
+        && request.resource.data.startDay is string
+        && request.resource.data.endDay is string
+        && request.resource.data.startDay <= request.resource.data.endDay;
+
+      // Un client peut annuler la sienne, rien d'autre : l'identité, les dates
+      // et la quantité sont figées après création. Toute autre modification
+      // (encaissement, avoir) passe par le loueur.
+      allow update: if estLoueur()
+        || (proprietaire(resource.data.uid)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'cancelledAt', 'cancellationFee',
+                           'refundedAmount', 'creditNoteNumber', 'paymentStatus'])
+            && request.resource.data.status == 'cancelled');
+
+      // On n'efface pas une réservation : on l'annule. L'historique comptable
+      // doit rester consultable.
+      allow delete: if false;
+    }
+
+    // ---- Disponibilité ----
+    match /availability/{variantId} {
+      // Lisible sans compte : le calendrier doit afficher les disponibilités à
+      // un visiteur qui n'est pas encore inscrit.
+      allow read: if true;
+
+      // Le stock (`units`) n'est modifiable que par le loueur. Les compteurs
+      // journaliers bougent à chaque réservation, donc tout client connecté
+      // peut les écrire — voir la limite assumée en tête de fichier.
+      allow update: if estLoueur()
+        || (estConnecte()
+            && request.resource.data.units == resource.data.units
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['days']));
+
+      allow create, delete: if estLoueur();
+    }
+
+    // ---- Configuration ----
+    match /config/{document} {
+      allow read: if true;
+      allow write: if false;   // se modifie depuis la console Firebase
+    }
+
+    // Tout le reste est fermé.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
