@@ -98,6 +98,17 @@ service cloud.firestore {
       allow create, delete: if estLoueur();
     }
 
+    // ---- Profils ----
+    //
+    // Auth ne conserve que l'e-mail : le nom et le téléphone vivent ici.
+    // Chacun n'accède qu'au sien ; le loueur lit tout, puisqu'il doit pouvoir
+    // joindre un client dont la réservation pose problème.
+    match /users/{uid} {
+      allow read: if proprietaire(uid) || estLoueur();
+      allow create, update: if proprietaire(uid);
+      allow delete: if proprietaire(uid) || estLoueur();
+    }
+
     // ---- Configuration ----
     match /config/{document} {
       allow read: if true;

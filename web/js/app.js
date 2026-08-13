@@ -642,7 +642,18 @@ VB.boot = () => {
 
   // Sans `firebase-config.js` renseigné, cet appel ne télécharge rien et ne
   // change rien : le site reste en mode local. Voir SETUP-FIREBASE.md.
-  VB.Remote?.init().catch(e => console.warn('[VB] Firebase indisponible :', e));
+  VB.Remote?.init()
+    .then(actif => {
+      if (!actif) return;
+      // La session Firebase est restaurée de façon asynchrone : au premier
+      // rendu, personne n'est encore connecté. On réaffiche quand l'état
+      // d'authentification arrive, puis à chaque connexion ou déconnexion.
+      VB.Remote.onAuthChanged(async user => {
+        await VB.Accounts._onAuthChanged(user);
+        VB.render();
+      });
+    })
+    .catch(e => console.warn('[VB] Firebase indisponible :', e));
 };
 
 document.addEventListener('DOMContentLoaded', VB.boot);

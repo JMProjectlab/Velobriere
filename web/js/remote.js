@@ -74,6 +74,81 @@ VB.Remote = {
     return auth?.currentUser?.uid ?? null;
   },
 
+  /* ---------- Comptes ----------
+     Firebase Auth remplace la simulation de `VB.Accounts` : l'identité est
+     vérifiée côté serveur, la session suit d'un appareil à l'autre, et le mot
+     de passe n'est jamais stocké ici. Le profil (nom, téléphone) vit à côté,
+     dans `users/{uid}` : Auth ne conserve que l'e-mail. */
+
+  /** Prévient à chaque connexion ou déconnexion, y compris au démarrage. */
+  onAuthChanged(callback) {
+    if (!this.active) return;
+    mods.onAuthStateChanged(auth, callback);
+  },
+
+  async createAccount(email, password) {
+    const cred = await mods.createUserWithEmailAndPassword(auth, email, password);
+    return cred.user.uid;
+  },
+
+  async signIn(email, password) {
+    const cred = await mods.signInWithEmailAndPassword(auth, email, password);
+    return cred.user.uid;
+  },
+
+  async signOut() {
+    this.stopWatching();
+    await mods.signOut(auth);
+  },
+
+  /** Firebase exige une authentification récente pour changer un mot de passe. */
+  async changePassword(currentPassword, newPassword) {
+    const user = auth.currentUser;
+    if (!user) throw new Error('Vous devez être connecté.');
+    const credential = mods.EmailAuthProvider.credential(user.email, currentPassword);
+    await mods.reauthenticateWithCredential(user, credential);
+    await mods.updatePassword(user, newPassword);
+  },
+
+  async saveProfile(uid, profile) {
+    await mods.setDoc(mods.doc(db, 'users', uid), profile, { merge: true });
+  },
+
+  async loadProfile(uid) {
+    const snap = await mods.getDoc(mods.doc(db, 'users', uid));
+    return snap.exists() ? snap.data() : null;
+  },
+
+  /** Traduit les codes d'erreur Firebase en messages lisibles.
+      Connexion : message identique dans tous les cas, pour ne pas révéler
+      si l'adresse existe. */
+  errorMessage(error, contexte) {
+    const code = error?.code || '';
+    if (contexte === 'connexion') {
+      if (code.startsWith('auth/too-many-requests')) {
+        return 'Trop de tentatives. Réessayez dans quelques minutes.';
+      }
+      if (code.startsWith('auth/')) return 'Adresse e-mail ou mot de passe incorrect.';
+    }
+    switch (code) {
+      case 'auth/email-already-in-use':
+        return 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous plutôt.';
+      case 'auth/invalid-email':
+        return "L'adresse e-mail n'est pas valide.";
+      case 'auth/weak-password':
+        return 'Le mot de passe est trop court.';
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        return 'Mot de passe actuel incorrect.';
+      case 'auth/requires-recent-login':
+        return 'Par sécurité, reconnectez-vous avant de changer votre mot de passe.';
+      case 'auth/network-request-failed':
+        return 'Connexion au serveur impossible. Vérifiez votre accès à Internet.';
+      default:
+        return error?.message || 'Une erreur est survenue.';
+    }
+  },
+
   /* ---------- Lecture ---------- */
 
   /** Écoute les réservations du compte connecté et rafraîchit l'affichage. */

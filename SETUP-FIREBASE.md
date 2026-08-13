@@ -15,12 +15,15 @@ est terminé.
 | Étape | État |
 |---|---|
 | 1. Fondation : modèle de données, règles de sécurité, couche Firestore web | **Faite** |
-| 2. Comptes : remplacer `VB.Accounts` par Firebase Auth | à faire |
-| 3. Bascule des écritures et portage iOS | à faire |
+| 2. Comptes : `VB.Accounts` bascule sur Firebase Auth | **Faite** |
+| 3. Bascule des écritures de réservation, puis portage iOS | à faire |
 
-Tant que l'étape 2 n'est pas faite, le site continue de fonctionner en local :
-`firebase-config.js` n'est pas renseigné, donc `VB.Remote.init()` ne télécharge
-rien et ne change rien. **Rien n'est cassé, rien n'est encore branché.**
+Tant que `web/js/firebase-config.js` n'est pas renseigné, le site fonctionne
+exactement comme avant : `VB.Remote.init()` ne télécharge rien, `VB.Accounts`
+reste en simulation locale. **Rien n'est cassé, rien n'est encore actif.**
+
+Dès que la configuration est en place, les comptes deviennent réels sans qu'une
+ligne d'écran change.
 
 ---
 
@@ -84,17 +87,28 @@ visiteur. Ce qui protège les données, ce sont les règles.
 
 ---
 
-## Étape 2 — les comptes
+## Étape 2 — les comptes (faite)
 
-`web/js/accounts.js` est une simulation, et le fichier le dit lui-même :
-l'authentification n'est pas vérifiée, les comptes ne suivent pas d'un appareil
-à l'autre, et le hachage SHA-256 n'est pas une fonction de dérivation de mot de
-passe.
+`VB.Accounts` a désormais deux modes derrière la même API : Firebase Auth si la
+configuration est présente, simulation locale sinon. Aucun écran n'a changé.
 
-Les règles Firestore exigent `request.auth` : **tant que `VB.Accounts` n'est pas
-remplacé par Firebase Auth, aucune écriture ne passera.** C'est le vrai
-prochain chantier. Les écrans n'ont pas à changer — seule l'implémentation de
-`VB.Accounts` (inscription, connexion, session) devient un appel au SDK.
+Ce que la bascule corrige, une fois la configuration en place :
+
+- l'identité est **vérifiée côté serveur** — le `localStorage` ne suffit plus à
+  se faire passer pour quelqu'un ;
+- la session **suit d'un appareil à l'autre** ;
+- le mot de passe n'est plus stocké ni haché ici : Firebase s'en charge, avec
+  une vraie fonction de dérivation ;
+- changer de mot de passe exige une authentification récente.
+
+Le profil (nom, téléphone) vit dans `users/{uid}`, Auth ne conservant que
+l'e-mail. Les getters `current()` et `currentId()` restent synchrones : le
+compte est tenu en cache et rafraîchi par `onAuthStateChanged`, qui déclenche
+un réaffichage — la session Firebase se restaure de façon asynchrone, donc
+personne n'est encore connecté au premier rendu.
+
+Une chose à ne pas oublier côté console : activer **Authentication → Sign-in
+method → Adresse e-mail / Mot de passe**, sinon toute inscription échouera.
 
 ---
 
