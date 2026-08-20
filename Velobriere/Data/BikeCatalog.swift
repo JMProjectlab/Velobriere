@@ -8,7 +8,7 @@ import Foundation
 /// (lien ci-dessous) n'a pas pu être récupérée automatiquement (accès
 /// restreint sur decathlonpro.fr), donc l'app renvoie vers la page officielle
 /// plutôt que d'afficher des chiffres non vérifiés. Les tarifs, eux, sont
-/// ceux communiqués par Vélo Brière — casque et antivol inclus dans toutes
+/// ceux communiqués par Ker Vélo Brière — casque et antivol inclus dans toutes
 /// les locations, livraison en option (+10 €, rayon de 10 km).
 enum BikeCatalog {
     static let eActv100 = Bike(

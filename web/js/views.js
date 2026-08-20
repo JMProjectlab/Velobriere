@@ -607,7 +607,7 @@ ${VB.esc(inv.customerEmail || '')}</p>
 VB.viewLegalIndex = () => `
   <div class="page-head">
     <h1>Informations</h1>
-    <p class="lede">Informations légales de Vélo Brière et détail du traitement de vos données.</p>
+    <p class="lede">Informations légales de Ker Vélo Brière et détail du traitement de vos données.</p>
   </div>
   <div class="legal-grid">
     ${VB.LEGAL_DOCS.map(doc => `
@@ -864,9 +864,9 @@ VB.viewHome = () => {
     <div class="home">
       <div class="home-hero">
         <div class="home-logo">
-          <img src="assets/logo.jpg" alt="Vélo Brière — vélo électrique au bord des marais de Brière" width="480" height="480">
+          <img src="assets/logo.jpg" alt="Ker Vélo Brière — vélo électrique au bord des marais de Brière" width="480" height="480">
         </div>
-        <h1 class="home-title">VÉLO BRIÈRE</h1>
+        <h1 class="home-title">KER VÉLO BRIÈRE</h1>
         <p class="home-tagline">Location de vélos électriques</p>
         <p class="home-lede">Balades électriques au cœur de la Brière, entre marais, villages et chemins.
         Casque et antivol inclus, livraison possible dans un rayon de ${VB.BIKE.deliveryRadiusKm} km.</p>

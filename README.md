@@ -1,4 +1,4 @@
-# Vélo Brière — réservation de vélos électriques
+# Ker Vélo Brière — réservation de vélos électriques
 
 Deux applications, mêmes fonctionnalités et mêmes règles métier :
 
@@ -19,7 +19,7 @@ les deux applications ne la lit — c'est à nous de nous y tenir.
 
 ## App iOS de réservation
 
-App iOS (SwiftUI) pour réserver un vélo auprès de **Vélo Brière**, location de vélos
+App iOS (SwiftUI) pour réserver un vélo auprès de **Ker Vélo Brière**, location de vélos
 électriques à Saint-Lyphard, au cœur du Parc naturel régional de Brière.
 
 ## Ouvrir le projet

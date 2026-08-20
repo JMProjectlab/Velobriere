@@ -48,7 +48,7 @@ struct Invoice: Identifiable, Codable, Hashable {
 
     var total: Double { lines.reduce(0) { $0 + $1.total }.roundedToCents }
 
-    /// Mention de TVA. Le régime de Vélo Brière n'étant pas connu, il reste à
+    /// Mention de TVA. Le régime de Ker Vélo Brière n'étant pas connu, il reste à
     /// renseigner : soit le taux applicable, soit la mention de franchise en base.
     static let vatNote = "[À COMPLÉTER : régime de TVA — taux applicable, ou mention « TVA non applicable, art. 293 B du CGI » en franchise en base]"
 
