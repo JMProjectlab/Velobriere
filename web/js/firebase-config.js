@@ -1,4 +1,4 @@
-// Configuration de l'application web Firebase de Vélo Brière.
+// Configuration de l'application web Firebase de Ker Vélo Brière.
 // Source : console Firebase → Paramètres du projet → Vos applications → Web.
 //
 // Tant que `apiKey` vaut « REMPLACER », le site fonctionne exactement comme
