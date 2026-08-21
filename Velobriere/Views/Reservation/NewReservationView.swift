@@ -223,7 +223,7 @@ struct NewReservationView: View {
                             .font(Theme.Fonts.body(16, weight: .bold))
                             .foregroundStyle(Theme.Colors.primaryStrong)
                     }
-                    Text("Cette demande est enregistrée sur votre appareil. Vélo Brière vous recontactera pour la confirmer.")
+                    Text("Cette demande est enregistrée sur votre appareil. Ker Vélo Brière vous recontactera pour la confirmer.")
                         .font(Theme.Fonts.body(12))
                         .foregroundStyle(Theme.Colors.inkSoft)
                         .padding(.top, Theme.Spacing.xs)

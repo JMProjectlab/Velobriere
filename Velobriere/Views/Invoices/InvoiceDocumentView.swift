@@ -47,7 +47,7 @@ struct InvoiceDocumentView: View {
 
     private var partiesCard: some View {
         card(title: "Émetteur et client") {
-            Text("Vélo Brière\n135 Kermouraud\n44410 Saint-Lyphard\n06 07 34 37 97")
+            Text("Ker Vélo Brière\n135 Kermouraud\n44410 Saint-Lyphard\n06 07 34 37 97")
                 .font(Theme.Fonts.body(13))
                 .foregroundStyle(Theme.Colors.ink)
             Text(Invoice.sellerIdentityNote)

@@ -5,7 +5,7 @@ struct LegalInfoView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                    Text("Retrouvez ici les informations légales de Vélo Brière et le détail du traitement de vos données.")
+                    Text("Retrouvez ici les informations légales de Ker Vélo Brière et le détail du traitement de vos données.")
                         .font(Theme.Fonts.body(14))
                         .foregroundStyle(Theme.Colors.inkSoft)
                         .padding(.top, Theme.Spacing.xs)
@@ -71,7 +71,7 @@ struct LegalInfoView: View {
                 .font(Theme.Fonts.body(12, weight: .semibold))
                 .tracking(1.5)
                 .foregroundStyle(Theme.Colors.sage)
-            Text("Vélo Brière\n135 Kermouraud\n44410 Saint-Lyphard")
+            Text("Ker Vélo Brière\n135 Kermouraud\n44410 Saint-Lyphard")
                 .font(Theme.Fonts.body(14))
                 .foregroundStyle(Theme.Colors.ink)
             Link(destination: URL(string: "tel:+33607343797")!) {
