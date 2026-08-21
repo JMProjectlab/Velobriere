@@ -2,7 +2,7 @@ import Foundation
 
 /// Un document légal (mentions légales, politique de confidentialité, CGL).
 ///
-/// Les passages que Vélo Brière doit renseigner sont balisés avec
+/// Les passages que Ker Vélo Brière doit renseigner sont balisés avec
 /// `LegalDocument.placeholderMarker` : l'app les met en évidence pour éviter
 /// qu'un document incomplet parte en production.
 struct LegalDocument: Identifiable, Hashable {

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Conditions d'annulation appliquées par Vélo Brière.
+/// Conditions d'annulation appliquées par Ker Vélo Brière.
 ///
 /// - Plus de 2 jours avant le départ : remboursement intégral.
 /// - De 2 jours à la veille incluse, et le jour du départ : 50 % retenus.
@@ -52,7 +52,7 @@ enum CancellationPolicy {
         tier(startDate: startDate, from: now) != .free
     }
 
-    /// Montant retenu par Vélo Brière en cas d'annulation.
+    /// Montant retenu par Ker Vélo Brière en cas d'annulation.
     static func fee(amount: Double, startDate: Date, from now: Date = .now) -> Double {
         (amount * tier(startDate: startDate, from: now).feeRatio).roundedToCents
     }
