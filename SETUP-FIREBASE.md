@@ -129,8 +129,10 @@ Pour activer le mode partagé sur iOS :
 1. Xcode → *File → Add Package Dependencies* →
    `https://github.com/firebase/firebase-ios-sdk`, produits **FirebaseAuth** et
    **FirebaseFirestore**.
-2. Déposer `GoogleService-Info.plist` dans la cible (il est dans `.gitignore`,
-   comme sur Scornade : il ne part pas sur le dépôt).
+2. Déposer `GoogleService-Info.plist` dans la cible. Il est couvert par le
+   `.gitignore` du dépôt : il ne part pas sur GitHub. **Vérifie quand même
+   `git status` avant de committer** — sur Scornade, l'intégration Git de
+   Xcode l'avait mis en zone d'attente malgré l'exclusion.
 3. L'écran de connexion existe (`AccountView`, accessible depuis l'onglet
    Réservations). Le compte y est **facultatif** : réserver, consulter et
    annuler fonctionnent sans, en local. Se connecter ne fait qu'une chose, mais
