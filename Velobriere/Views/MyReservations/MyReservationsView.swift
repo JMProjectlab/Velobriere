@@ -9,6 +9,8 @@ struct MyReservationsView: View {
     /// Réservation déjà annulée que l'on retire de la liste.
     @State private var reservationToDelete: Reservation?
     @State private var resultMessage: String?
+    @EnvironmentObject private var session: AccountSession
+    @State private var showAccount = false
 
     private let paymentService: PaymentService = SimulatedPaymentService()
 
@@ -52,6 +54,21 @@ struct MyReservationsView: View {
             }
             .background(Theme.Colors.background)
             .navigationTitle("Mes réservations")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAccount = true
+                    } label: {
+                        Label(session.estConnecte ? "Mon compte" : "Se connecter",
+                              systemImage: session.estConnecte
+                                ? "person.crop.circle.fill"
+                                : "person.crop.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showAccount) {
+                AccountView().environmentObject(session)
+            }
             .navigationDestination(for: UUID.self) { id in
                 ReservationDetailView(reservationID: id)
             }
@@ -124,7 +141,14 @@ struct MyReservationsView: View {
                     feeAmount: fee
                 ).number
             }
-            reservationStore.cancel(reservation.id, fee: fee, refund: refund, creditNoteNumber: creditNoteNumber)
+            do {
+                try await reservationStore.cancelSynchronised(
+                    reservation.id, fee: fee, refund: refund, creditNoteNumber: creditNoteNumber
+                )
+            } catch {
+                resultMessage = "Annulation impossible : " + error.localizedDescription
+                return
+            }
             resultMessage = CancellationPolicy.resultMessage(
                 fee: fee,
                 refund: refund,

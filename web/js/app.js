@@ -203,10 +203,23 @@ VB.askCancel = id => {
   });
 };
 
-VB.doCancel = id => {
+VB.doCancel = async id => {
   VB.closeDialog();
   const r = VB.reservationById(id);
   if (!r) return;
+
+  // En mode Firebase, l'annulation rend les vélos au stock dans la même
+  // transaction qui marque la réservation annulée. Si elle échoue, on
+  // n'émet aucun avoir : mieux vaut ne rien faire qu'un remboursement
+  // pour une réservation restée active côté serveur.
+  if (VB.Remote?.active && VB.Accounts.currentId()) {
+    try {
+      await VB.Remote.cancelReservation(r);
+    } catch (error) {
+      VB.notify("Annulation impossible : " + (error?.message || 'réessayez dans un instant.'));
+      return;
+    }
+  }
 
   const fee = VB.cancellationFee(r.totalPrice, r.start);
   const refund = VB.cancellationRefund(r.totalPrice, r.start);
@@ -220,6 +233,10 @@ VB.doCancel = id => {
   r.creditNoteNumber = creditNote ? creditNote.number : null;
   if (r.paymentStatus === 'paid') r.paymentStatus = 'refunded';
   VB.saveReservations();
+  if (VB.Remote?.active && VB.Accounts.currentId()) {
+    // Le détail comptable de l'annulation (frais, avoir) rejoint le serveur.
+    VB.Remote.updateReservation(r).catch(e => console.warn('[VB] Avoir non synchronisé :', e));
+  }
   VB.render();
   VB.notify(VB.cancellationResultMessage(fee, refund, creditNote ? creditNote.number : null));
 };
@@ -254,8 +271,23 @@ VB.refreshCardButton = () => {
 VB.pay = async method => {
   if (method === 'card' && !VB.isCardFormValid()) return;
 
+  // Avant d'encaisser : le stock a pu changer depuis l'ouverture du
+  // formulaire. Refuser ici coûte un message ; refuser après avoir encaissé
+  // coûte un remboursement à faire à la main.
+  const problem = VB.validateDraft(VB.draft);
+  if (problem) {
+    VB.showPaymentProblem(problem);
+    return;
+  }
+
   const applePayBtn = document.getElementById('applePayBtn');
   const cardBtn = document.getElementById('payCardBtn');
+  // Les libellés sont dynamiques (« Payer 78,00 € ») : on les relève avant de
+  // les remplacer, pour pouvoir les remettre tels quels en cas de refus.
+  VB._payLabels = {
+    applePay: applePayBtn?.innerHTML ?? null,
+    card: cardBtn?.textContent ?? null
+  };
   [applePayBtn, cardBtn].forEach(b => { if (b) b.disabled = true; });
   if (method === 'applePay' && applePayBtn) applePayBtn.innerHTML = '<span class="spinner"></span>';
   else if (cardBtn) cardBtn.textContent = 'Paiement en cours…';
@@ -281,12 +313,71 @@ VB.pay = async method => {
     cancelledAt: null, cancellationFee: null, refundedAmount: null, creditNoteNumber: null
   };
 
+  reservation.accountId = VB.Accounts.currentId();
+
+  // Enregistrement. En mode Firebase, c'est la transaction qui fait autorité :
+  // elle relit le stock au moment de l'écriture, donc deux réservations
+  // simultanées ne peuvent pas passer toutes les deux. Le contrôle local
+  // ci-dessous ne sert qu'à donner un message immédiat en mode hors-ligne.
+  if (VB.Remote?.active && VB.Accounts.currentId()) {
+    try {
+      await VB.Remote.commitReservation(reservation);
+    } catch (error) {
+      VB.showPaymentProblem(
+        (error?.message || 'Enregistrement impossible.')
+        + " Aucune réservation n'a été enregistrée et aucune facture n'a été émise."
+      );
+      return;
+    }
+  } else {
+    // Dernier contrôle, après l'attente du paiement : c'est pendant cette
+    // attente que le stock peut avoir été pris. Aucune facture n'est émise si
+    // la réservation n'est pas enregistrable.
+    const lateProblem = VB.validateDraft(reservation);
+    if (lateProblem) {
+      VB.showPaymentProblem(
+        lateProblem + " Aucune réservation n'a été enregistrée et aucune facture n'a été émise."
+      );
+      return;
+    }
+  }
+
   const invoice = VB.issueInvoice(reservation, method);
   reservation.invoiceNumber = invoice.number;
-  reservation.accountId = VB.Accounts.currentId();
   VB.state.reservations.push(reservation);
   VB.saveReservations();
+  // La réservation distante porte désormais le numéro de facture.
+  if (VB.Remote?.active && VB.Accounts.currentId()) {
+    VB.Remote.updateReservation(reservation).catch(e => console.warn('[VB] Facture non synchronisée :', e));
+  }
   VB.navigate({ name: 'confirmation', reservation, invoice });
+};
+
+/** Affiche un refus au-dessus des boutons de paiement et les réactive. */
+VB.showPaymentProblem = message => {
+  const applePayBtn = document.getElementById('applePayBtn');
+  const cardBtn = document.getElementById('payCardBtn');
+  const labels = VB._payLabels || {};
+  if (applePayBtn) {
+    applePayBtn.disabled = false;
+    if (labels.applePay != null) applePayBtn.innerHTML = labels.applePay;
+  }
+  if (cardBtn) {
+    cardBtn.disabled = !VB.isCardFormValid();
+    if (labels.card != null) cardBtn.textContent = labels.card;
+  }
+
+  let slot = document.getElementById('paymentProblem');
+  if (!slot) {
+    slot = document.createElement('div');
+    slot.id = 'paymentProblem';
+    slot.className = 'notice notice-warning';
+    slot.setAttribute('role', 'alert');
+    const anchor = cardBtn || applePayBtn;
+    anchor?.parentNode?.insertBefore(slot, anchor);
+  }
+  slot.textContent = message;
+  slot.scrollIntoView({ block: 'center', behavior: 'smooth' });
 };
 
 
@@ -586,6 +677,36 @@ VB.boot = () => {
   VB.bootstrapData();
   VB.bindEvents();
   VB.render();
+
+  // Sans `firebase-config.js` renseigné, cet appel ne télécharge rien et ne
+  // change rien : le site reste en mode local. Voir SETUP-FIREBASE.md.
+  VB.Remote?.init()
+    .then(actif => {
+      if (!actif) return;
+      // La session Firebase est restaurée de façon asynchrone : au premier
+      // rendu, personne n'est encore connecté. On réaffiche quand l'état
+      // d'authentification arrive, puis à chaque connexion ou déconnexion.
+      VB.Remote.onAuthChanged(async user => {
+        await VB.Accounts._onAuthChanged(user);
+
+        if (user) {
+          // À partir d'ici, le serveur fait autorité : les réservations
+          // affichées sont celles du compte, vues depuis n'importe quel
+          // appareil. C'est ce qui manquait pour que le client et le loueur
+          // regardent la même chose.
+          VB.Remote.watchReservations(list => {
+            VB.state.reservations = list;
+            VB.render();
+          });
+        } else {
+          // Déconnecté : retour aux réservations de ce navigateur.
+          VB.Remote.stopWatching();
+          VB.state.reservations = VB.loadReservations();
+        }
+        VB.render();
+      });
+    })
+    .catch(e => console.warn('[VB] Firebase indisponible :', e));
 };
 
 document.addEventListener('DOMContentLoaded', VB.boot);
