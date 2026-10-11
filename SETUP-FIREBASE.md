@@ -64,8 +64,14 @@ en SQL. C'est aussi la seule raison sérieuse de brancher un serveur.
 1. **Créer le projet** sur console.firebase.google.com. Un projet distinct de
    Scornade : les données d'une activité commerciale ne se mélangent pas avec
    celles d'une app perso.
-2. **Authentication → Sign-in method** : activer *Adresse e-mail / Mot de passe*,
-   et *Apple* si l'app iOS doit proposer « Se connecter avec Apple ».
+2. **Authentication → Sign-in method** : activer *Adresse e-mail / Mot de passe*
+   **et *Google*** (le site propose les deux). Google ne demande qu'un nom
+   public et une adresse d'assistance.
+
+   *Apple* n'est pas activé : sur le web, il réclame un Services ID dédié, la
+   clé `.p8`, le Key ID et un domaine vérifié chez Apple. À faire le jour où
+   l'app iOS proposera une connexion tierce — la règle 4.8 de l'App Store
+   impose alors Sign in with Apple à côté de Google.
 3. **Authentication → Settings → Domaines autorisés** : ajouter
    `jmprojectlab.github.io`, sinon la connexion sera refusée depuis le site.
 4. **Firestore Database** : créer la base en mode production, région

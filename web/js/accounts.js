@@ -189,6 +189,88 @@ VB.Accounts = {
     return { ok: true, account };
   },
 
+  /** Connexion ou inscription par Google.
+   *
+   *  Un fournisseur tiers donne une identité vérifiée, pas un dossier client :
+   *  Google fournit un e-mail et parfois un nom complet, **jamais un numéro de
+   *  téléphone**. Or les factures portent le nom du client et le loueur doit
+   *  pouvoir le joindre. D'où `profilIncomplet` : l'appelant enchaîne sur
+   *  l'écran de complément au lieu d'entrer dans l'application avec un dossier
+   *  à trous.
+   *
+   *  @returns {Promise<{ok:true, account, profilIncomplet:boolean}
+   *                   | {ok:true, redirection:true}
+   *                   | {ok:false, error:string}>}
+   */
+  async signInWithGoogle() {
+    if (!VB.Accounts.distant()) {
+      return { ok: false, error: "La connexion Google demande un serveur : elle n'est pas disponible dans cette démonstration." };
+    }
+    try {
+      const user = await VB.Remote.signInWithGoogle();
+      if (!user) return { ok: true, redirection: true };   // la page va se recharger
+
+      const existant = await VB.Remote.loadProfile(user.uid);
+      if (!existant) {
+        // Premier passage : on pose ce que Google sait, le reste viendra de
+        // l'écran de complément. `displayName` est découpé au premier espace —
+        // approximation assumée, l'utilisateur corrige juste après.
+        const [prenom = '', ...reste] = (user.displayName || '').trim().split(/\s+/);
+        await VB.Remote.saveProfile(user.uid, {
+          firstName: prenom,
+          lastName: reste.join(' ').toUpperCase(),
+          countryCode: VB.DEFAULT_COUNTRY_CODE,
+          phone: '',
+          email: user.email,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      await VB.Accounts._onAuthChanged({ uid: user.uid, email: user.email });
+      return {
+        ok: true,
+        account: VB.Accounts._cache,
+        profilIncomplet: !VB.Accounts.profilComplet(VB.Accounts._cache)
+      };
+    } catch (error) {
+      return { ok: false, error: VB.Remote.errorMessage(error, 'google') };
+    }
+  },
+
+  /** Un profil est complet quand une facture peut être émise et le client
+      joint : nom, prénom, téléphone valide. */
+  profilComplet(account) {
+    return !!(account
+      && account.firstName.trim()
+      && account.lastName.trim()
+      && VB.isValidPhone(account.countryCode || VB.DEFAULT_COUNTRY_CODE, account.phone || ''));
+  },
+
+  /** Enregistre les coordonnées manquantes après une connexion par Google. */
+  async completeProfile({ firstName, lastName, countryCode, phone }) {
+    const account = VB.Accounts.current();
+    if (!account) return { ok: false, error: 'Vous devez être connecté.' };
+    try {
+      await VB.Remote.saveProfile(account.id, {
+        firstName: firstName.trim(),
+        lastName: lastName.trim().toUpperCase(),
+        countryCode,
+        phone: phone.trim()
+      });
+      await VB.Accounts._onAuthChanged({ uid: account.id, email: account.email });
+      return { ok: true, account: VB.Accounts._cache };
+    } catch (error) {
+      return { ok: false, error: VB.Remote.errorMessage(error, 'profil') };
+    }
+  },
+
+  /** Vrai si ce compte a un mot de passe. Faux pour un compte Google : le
+      formulaire de changement de mot de passe n'a alors rien à changer. */
+  aUnMotDePasse() {
+    if (!VB.Accounts.distant()) return true;
+    return VB.Remote.hasPasswordProvider();
+  },
+
   async changePassword(accountId, currentPassword, newPassword) {
     if (VB.Accounts.distant()) {
       try {

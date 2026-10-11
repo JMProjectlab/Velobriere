@@ -62,6 +62,7 @@ VB.render = () => {
     case 'signin': root.innerHTML = VB.viewAuth('signin'); break;
     case 'signup': root.innerHTML = VB.viewAuth('signup'); break;
     case 'account': root.innerHTML = VB.viewAccount(); break;
+    case 'completeProfile': root.innerHTML = VB.viewCompleteProfile(); break;
     default: root.innerHTML = VB.viewCatalog();
   }
 
@@ -70,7 +71,7 @@ VB.render = () => {
     r.name === 'home' ? 'home'
     : ['catalog', 'bike', 'booking', 'checkout', 'confirmation'].includes(r.name) ? 'catalog'
     : ['reservations', 'reservation', 'invoice'].includes(r.name) ? 'reservations'
-    : ['signin', 'signup', 'account'].includes(r.name) ? 'account'
+    : ['signin', 'signup', 'account', 'completeProfile'].includes(r.name) ? 'account'
     : 'legal';
   document.querySelectorAll('.nav-link').forEach(btn => {
     if (btn.dataset.nav === section) btn.setAttribute('aria-current', 'page');
@@ -466,6 +467,54 @@ VB.handleSignIn = async () => {
   }
 };
 
+VB.handleGoogleSignIn = async () => {
+  VB.hideAuthError();
+  const result = await VB.Accounts.signInWithGoogle();
+  if (!result.ok) return VB.showAuthError(result.error);
+  if (result.redirection) return;   // la page part en redirection, rien à faire
+
+  const claimed = VB.claimGuestReservations(result.account);
+
+  // Un dossier à trous ne doit pas entrer dans l'application : facture sans
+  // nom, client injoignable. On passe par le complément d'abord.
+  if (result.profilIncomplet) return VB.navigate({ name: 'completeProfile' });
+
+  VB.navigate({ name: 'reservations' });
+  if (claimed > 0) {
+    VB.openDialog({
+      title: 'Réservations retrouvées',
+      message: `${claimed} réservation${claimed > 1 ? 's' : ''} faite${claimed > 1 ? 's' : ''} sans compte avec cette adresse e-mail ${claimed > 1 ? 'ont' : 'a'} été rattachée${claimed > 1 ? 's' : ''} à votre compte.`,
+      confirmLabel: 'OK', cancelLabel: 'Fermer', danger: false,
+      onConfirm: () => VB.closeDialog()
+    });
+  }
+};
+
+VB.handleCompleteProfile = async () => {
+  VB.hideAuthError();
+  const firstName = VB.val('cpFirstName').trim();
+  const lastName = VB.val('cpLastName').trim();
+  const countryCode = VB.val('cpCountryCode') || VB.DEFAULT_COUNTRY_CODE;
+  const phone = VB.val('cpPhone').trim();
+
+  const missing = [];
+  if (!firstName) missing.push('votre prénom');
+  if (!lastName) missing.push('votre nom');
+  if (!VB.isValidPhone(countryCode, phone)) missing.push('un numéro de téléphone valide');
+  if (missing.length) return VB.showAuthError(`Merci de renseigner ${VB.joinFr(missing)}.`);
+
+  const result = await VB.Accounts.completeProfile({ firstName, lastName, countryCode, phone });
+  if (!result.ok) return VB.showAuthError(result.error);
+
+  VB.navigate({ name: 'reservations' });
+  VB.openDialog({
+    title: 'Compte prêt',
+    message: `Bienvenue ${result.account.firstName} ! Vos prochaines réservations seront rattachées à ce compte.`,
+    confirmLabel: 'OK', cancelLabel: 'Fermer', danger: false,
+    onConfirm: () => VB.closeDialog()
+  });
+};
+
 VB.handleSignOut = () => VB.openDialog({
   title: 'Se déconnecter ?',
   message: "Vos réservations restent enregistrées et vous les retrouverez à la prochaine connexion sur ce navigateur.",
@@ -579,6 +628,8 @@ VB.bindEvents = () => {
         case 'signup': return VB.handleSignUp();
         case 'signin': return VB.handleSignIn();
         case 'signout': return VB.handleSignOut();
+        case 'google': return VB.handleGoogleSignIn();
+        case 'complete-profile': return VB.handleCompleteProfile();
         case 'change-password': return VB.handleChangePassword();
       }
     }
@@ -670,6 +721,21 @@ VB.bindEvents = () => {
 
 /* ---------- Démarrage ---------- */
 
+/** Le bandeau du haut annonce « données enregistrées dans ce navigateur
+ *  uniquement ». C'est vrai en mode local, faux dès que Firestore est branché :
+ *  les réservations partent alors sur un serveur partagé. Le paiement, lui,
+ *  reste simulé dans les deux cas.
+ *
+ *  Un bandeau qui ment sur le traitement des données n'est pas un détail
+ *  cosmétique — c'est exactement ce qu'un visiteur lit pour décider s'il
+ *  confie son nom et son téléphone. */
+VB.majBandeauDemo = () => {
+  const el = document.getElementById('demoBarText');
+  if (!el) return;
+  el.innerHTML = '<strong>Démonstration</strong> — paiement simulé. '
+    + 'Vos réservations sont enregistrées chez le loueur.';
+};
+
 VB.boot = () => {
   let stored = null;
   try { stored = localStorage.getItem(VB.THEME_KEY); } catch (e) { /* stockage indisponible */ }
@@ -683,6 +749,7 @@ VB.boot = () => {
   VB.Remote?.init()
     .then(actif => {
       if (!actif) return;
+      VB.majBandeauDemo();
       // La session Firebase est restaurée de façon asynchrone : au premier
       // rendu, personne n'est encore connecté. On réaffiche quand l'état
       // d'authentification arrive, puis à chaque connexion ou déconnexion.

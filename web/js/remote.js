@@ -67,6 +67,13 @@ VB.Remote = {
     auth = authMod.getAuth(app);
     db = dbMod.getFirestore(app);
     this.active = true;
+
+    // Chemin de repli de la connexion Google : quand la popup est bloquée, on
+    // part en redirection et c'est ici qu'on revient, au chargement suivant.
+    // L'échec est volontairement silencieux — l'utilisateur n'a peut-être
+    // jamais lancé de connexion.
+    try { await mods.getRedirectResult(auth); } catch (e) { /* pas de retour en attente */ }
+
     return true;
   },
 
@@ -94,6 +101,47 @@ VB.Remote = {
   async signIn(email, password) {
     const cred = await mods.signInWithEmailAndPassword(auth, email, password);
     return cred.user.uid;
+  },
+
+  /** Connexion Google.
+   *
+   *  Popup d'abord, redirection en repli. La popup garde l'utilisateur sur la
+   *  page — mais Safari, les navigateurs in-app (Instagram, Facebook) et les
+   *  bloqueurs la refusent souvent. La redirection marche partout au prix d'un
+   *  rechargement complet ; son retour est récupéré dans `init()`.
+   *
+   *  @returns {Promise<{uid, email, displayName}|null>} null si l'on est parti
+   *           en redirection : la page va se recharger, il n'y a rien à faire.
+   */
+  async signInWithGoogle() {
+    const provider = new mods.GoogleAuthProvider();
+    // Forcer le choix du compte : sans cela, un navigateur déjà connecté à un
+    // compte Google le réutilise sans rien demander, ce qui est déroutant sur
+    // un ordinateur partagé.
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    try {
+      const cred = await mods.signInWithPopup(auth, provider);
+      return {
+        uid: cred.user.uid,
+        email: (cred.user.email || '').toLowerCase(),
+        displayName: cred.user.displayName || ''
+      };
+    } catch (error) {
+      const code = error?.code || '';
+      const popupRefusee =
+        code === 'auth/popup-blocked' ||
+        code === 'auth/operation-not-supported-in-this-environment';
+      if (!popupRefusee) throw error;
+      await mods.signInWithRedirect(auth, provider);
+      return null;
+    }
+  },
+
+  /** Vrai si le compte a un mot de passe à changer. Un compte créé via Google
+      n'en a pas : lui proposer le formulaire serait une impasse. */
+  hasPasswordProvider() {
+    return !!auth?.currentUser?.providerData?.some(p => p.providerId === 'password');
   },
 
   async signOut() {
@@ -144,6 +192,15 @@ VB.Remote = {
         return 'Par sécurité, reconnectez-vous avant de changer votre mot de passe.';
       case 'auth/network-request-failed':
         return 'Connexion au serveur impossible. Vérifiez votre accès à Internet.';
+      case 'auth/popup-closed-by-user':
+      case 'auth/cancelled-popup-request':
+        return 'Connexion Google annulée.';
+      case 'auth/account-exists-with-different-credential':
+        return "Un compte existe déjà avec cette adresse e-mail, créé avec un mot de passe. Connectez-vous ainsi, ou utilisez une autre adresse Google.";
+      case 'auth/unauthorized-domain':
+        return "Ce domaine n'est pas autorisé dans la console Firebase (Authentication → Settings → Domaines autorisés).";
+      case 'auth/operation-not-allowed':
+        return "La connexion Google n'est pas activée dans la console Firebase (Authentication → Sign-in method).";
       default:
         return error?.message || 'Une erreur est survenue.';
     }

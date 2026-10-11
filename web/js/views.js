@@ -657,6 +657,66 @@ VB.viewLegalDoc = id => {
 
 /* ---------- Comptes ---------- */
 
+/* Logo Google officiel, en SVG inline : aucune requête réseau, et il reste net
+   à toutes les tailles. Les quatre couleurs sont imposées par les règles de
+   marque de Google — on ne les recolore pas. */
+VB.LOGO_GOOGLE = `
+  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+    <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.49h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.63Z"/>
+    <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/>
+    <path fill="#FBBC05" d="M3.97 10.73a5.4 5.4 0 0 1 0-3.46V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.32Z"/>
+    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.32C4.68 5.16 6.66 3.58 9 3.58Z"/>
+  </svg>`;
+
+/** Écran de complément : une connexion Google donne une identité vérifiée,
+    pas un dossier client. Ces champs manquent, et ils ne sont pas décoratifs —
+    la facture porte le nom, le loueur appelle le numéro. */
+VB.viewCompleteProfile = () => {
+  const account = VB.Accounts.current();
+  if (!account) return VB.viewAuth('signin');
+
+  return `
+    <div class="auth-wrap">
+      <div class="page-head">
+        <p class="eyebrow">Dernière étape</p>
+        <h1>Complétez vos coordonnées</h1>
+        <p class="lede">Connecté avec <strong>${VB.esc(account.email)}</strong>.
+        Google ne transmet pas de numéro de téléphone : le loueur en a besoin
+        pour vous joindre, et votre nom figure sur les factures.</p>
+      </div>
+
+      <div id="formAlert" class="form-alert" role="alert"></div>
+
+      <div class="card">
+        <div class="two-col">
+          <div class="field-group">
+            <label class="field-label" for="cpFirstName">Prénom</label>
+            <input class="field" id="cpFirstName" autocomplete="given-name" value="${VB.esc(account.firstName || '')}">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="cpLastName">Nom</label>
+            <input class="field" id="cpLastName" autocomplete="family-name" value="${VB.esc(account.lastName || '')}">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="cpPhone">Téléphone</label>
+          <div class="field-row">
+            <select class="field" id="cpCountryCode" aria-label="Indicatif pays">
+              ${VB.COUNTRY_CODES.map(c => `<option value="${c.code}" ${c.code === (account.countryCode || VB.DEFAULT_COUNTRY_CODE) ? 'selected' : ''}>${c.flag} ${c.code}</option>`).join('')}
+            </select>
+            <input class="field" id="cpPhone" type="tel" autocomplete="tel" value="${VB.esc(account.phone || '')}">
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" style="margin-top:18px;" data-auth="complete-profile">
+          Enregistrer et continuer
+        </button>
+      </div>
+    </div>
+  `;
+};
+
 VB.viewAuth = mode => {
   const isSignUp = mode === 'signup';
   return `
@@ -716,6 +776,13 @@ VB.viewAuth = mode => {
           ${isSignUp ? 'Créer mon compte' : 'Se connecter'}
         </button>
 
+        ${VB.Accounts.distant() ? `
+        <div class="auth-sep"><span>ou</span></div>
+        <button class="btn btn-secondary btn-block btn-google" data-auth="google">
+          ${VB.LOGO_GOOGLE}
+          <span>Continuer avec Google</span>
+        </button>` : ''}
+
         <p class="auth-switch">
           ${isSignUp
             ? `Vous avez déjà un compte ? <button class="btn-link" data-action="go-signin">Se connecter</button>`
@@ -723,12 +790,13 @@ VB.viewAuth = mode => {
         </p>
       </div>
 
+      ${VB.Accounts.distant() ? '' : `
       <div class="notice notice-info" style="margin-top:18px;">
         <span aria-hidden="true">ℹ</span>
         <span><strong>Démonstration</strong> — le compte est enregistré dans ce navigateur uniquement.
         Il ne permet pas encore de retrouver ses réservations depuis un autre appareil :
         cela demandera un serveur.</span>
-      </div>
+      </div>`}
     </div>
   `;
 };
@@ -758,6 +826,7 @@ VB.viewAccount = () => {
           <div class="detail-row"><span class="k">Téléphone</span><span class="v">${VB.esc(account.countryCode)} ${VB.esc(account.phone)}</span></div>
         </div>
 
+        ${VB.Accounts.aUnMotDePasse() ? `
         <div class="card">
           <p class="section-label">Changer de mot de passe</p>
           <div class="field-group">
@@ -772,7 +841,13 @@ VB.viewAccount = () => {
           <button class="btn btn-secondary btn-block" style="margin-top:14px;" data-auth="change-password">
             Mettre à jour le mot de passe
           </button>
-        </div>
+        </div>` : `
+        <div class="card">
+          <p class="section-label">Connexion</p>
+          <p class="fine-print" style="margin:0;">Vous vous connectez avec Google.
+          Il n'y a pas de mot de passe à gérer ici : il se change depuis votre
+          compte Google.</p>
+        </div>`}
       </div>
 
       <div class="split-sticky stack">
