@@ -232,7 +232,15 @@ struct ReservationDetailView: View {
                     feeAmount: fee
                 ).number
             }
-            reservationStore.cancel(reservation.id, fee: fee, refund: refund, creditNoteNumber: creditNoteNumber)
+            do {
+                try await reservationStore.cancelSynchronised(
+                    reservation.id, fee: fee, refund: refund, creditNoteNumber: creditNoteNumber
+                )
+            } catch {
+                isCancelling = false
+                cancellationResultMessage = "Annulation impossible : " + error.localizedDescription
+                return
+            }
             isCancelling = false
             cancellationResultMessage = CancellationPolicy.resultMessage(
                 fee: fee,

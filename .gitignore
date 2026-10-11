@@ -1,0 +1,34 @@
+# ---------------------------------------------------------------------------
+# Secrets et fichiers de configuration : ne doivent JAMAIS entrer dans le dépôt
+# ---------------------------------------------------------------------------
+
+# Configuration Firebase de l'app iOS. Contient les identifiants du projet et
+# le client OAuth : il se retélécharge en trois clics depuis la console, il n'a
+# donc aucune raison d'être versionné — d'autant que ce dépôt est public.
+GoogleService-Info.plist
+
+# Clés privées Apple (Sign in with Apple, App Store Connect API). Une clé .p8
+# ne peut être téléchargée qu'UNE FOIS depuis le portail développeur : si elle
+# fuite, il faut la révoquer et en régénérer une.
+*.p8
+
+# Certificats et profils de signature
+*.p12
+*.cer
+*.certSigningRequest
+*.mobileprovision
+
+# ---------------------------------------------------------------------------
+# Xcode
+# ---------------------------------------------------------------------------
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# ---------------------------------------------------------------------------
+# macOS
+# ---------------------------------------------------------------------------
+.DS_Store

@@ -132,6 +132,48 @@ VB.cancellationResultMessage = (fee, refund, creditNoteNumber) => {
 
 /* ---------- Validation ---------- */
 
+/* Recevabilité d'une réservation.
+
+   La règle vit ici, pas dans l'écran : le formulaire désactive déjà le bouton
+   quand le stock manque, mais un écran peut évoluer, se tromper, ou être
+   contourné. C'est le pendant exact de `ReservationStore.validate(_:)` côté
+   iOS — les deux doivent évoluer ensemble.
+
+   ⚠️ Contrôle LOCAL. Sans backend partagé, un navigateur ne voit pas les
+   réservations des autres : cette vérification est nécessaire, pas suffisante.
+   Le jour où les réservations passeront par un serveur, c'est ce contrôle-là
+   qui devra devenir une transaction côté serveur. */
+
+/** Renvoie un message d'erreur, ou `null` si la réservation est recevable.
+    `excludeId` retire une réservation du calcul de disponibilité, pour pouvoir
+    revalider une réservation déjà enregistrée sans qu'elle se compte elle-même. */
+VB.validateDraft = (draft, excludeId = null) => {
+  const start = VB.startOfDay(draft.start);
+  const end = VB.startOfDay(draft.end);
+  const today = VB.startOfDay(new Date());
+
+  if (end < start) return 'La date de fin doit être postérieure à la date de début.';
+  if (start < today) return 'La période choisie commence dans le passé.';
+
+  const quantity = Number(draft.quantity);
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    return "Le nombre de vélos doit être d'au moins un.";
+  }
+
+  const previous = VB.state.reservations;
+  if (excludeId) VB.state.reservations = previous.filter(r => r.id !== excludeId);
+  const available = VB.availableRange(start, end, draft.variantId);
+  VB.state.reservations = previous;
+
+  if (quantity > available) {
+    return available <= 0
+      ? "Plus aucun vélo de cette taille n'est disponible sur la période choisie."
+      : `Il ne reste que ${available} vélo${available > 1 ? 's' : ''} de cette taille `
+        + `sur la période choisie, pour ${quantity} demandé${quantity > 1 ? 's' : ''}.`;
+  }
+  return null;
+};
+
 VB.isValidEmail = email =>
   /^[A-Za-z0-9._%+-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/
     .test(email.trim());

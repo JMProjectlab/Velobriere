@@ -1,8 +1,22 @@
 /* Comptes clients : inscription, connexion, session.
  *
- * ⚠️ LIMITES CONNUES — À LIRE AVANT DE METTRE EN PRODUCTION
+ * DEUX MODES, une seule API. Les écrans appellent `VB.Accounts` sans savoir
+ * lequel est actif :
  *
- * Il n'y a pas de serveur : tout se joue dans le navigateur. Par conséquent :
+ *   • Firebase Auth, dès que `web/js/firebase-config.js` est renseigné.
+ *     L'identité est vérifiée côté serveur, la session suit d'un appareil à
+ *     l'autre, le mot de passe n'est jamais stocké ici. C'est le mode réel.
+ *
+ *   • Simulation locale, sinon. Le site reste utilisable et démontrable sans
+ *     aucune configuration — voir les limites ci-dessous, qui ne valent QUE
+ *     pour ce mode.
+ *
+ * Les getters de session (`current`, `currentId`) restent synchrones : le
+ * compte Firebase est tenu en cache et rafraîchi par `onAuthStateChanged`.
+ *
+ * ⚠️ LIMITES DE LA SIMULATION LOCALE — elles disparaissent en mode Firebase
+ *
+ * Sans serveur, tout se joue dans le navigateur. Par conséquent :
  *
  * 1. Ce n'est PAS une authentification. Rien ne vérifie l'identité côté serveur.
  *    Quiconque accède au navigateur peut lire ou modifier le localStorage, donc
@@ -18,9 +32,7 @@
  *    à attaquer par force brute. Un vrai système hache côté serveur avec
  *    bcrypt, scrypt ou Argon2.
  *
- * Pour un usage réel, remplacer VB.Accounts par des appels à une API :
- * POST /inscription, POST /connexion (qui renvoie un jeton de session),
- * GET /moi. Les écrans et le reste de l'application n'ont pas à changer.
+ * C'est exactement ce que le mode Firebase corrige.
  */
 
 window.VB = window.VB || {};
@@ -32,7 +44,37 @@ VB.PASSWORD_MIN_LENGTH = 8;
 
 VB.Accounts = {
 
-  /* ---------- Stockage ---------- */
+  /* ---------- Mode ---------- */
+
+  /** Vrai dès que Firebase est configuré et initialisé. */
+  distant() {
+    return !!(VB.Remote && VB.Remote.active);
+  },
+
+  /** Compte Firebase courant, tenu à jour par `onAuthStateChanged`.
+      Permet à `current()` de rester synchrone comme avant. */
+  _cache: null,
+
+  /** Appelé au démarrage et à chaque changement d'état d'authentification. */
+  async _onAuthChanged(user) {
+    if (!user) {
+      VB.Accounts._cache = null;
+      return;
+    }
+    let profile = null;
+    try { profile = await VB.Remote.loadProfile(user.uid); } catch (e) { /* profil optionnel */ }
+    VB.Accounts._cache = {
+      id: user.uid,
+      email: (user.email || '').toLowerCase(),
+      firstName: profile?.firstName || '',
+      lastName: profile?.lastName || '',
+      countryCode: profile?.countryCode || '+33',
+      phone: profile?.phone || '',
+      createdAt: profile?.createdAt ? new Date(profile.createdAt) : new Date()
+    };
+  },
+
+  /* ---------- Stockage (mode local uniquement) ---------- */
 
   all() {
     try {
@@ -83,6 +125,26 @@ VB.Accounts = {
   /** @returns {Promise<{ok: true, account} | {ok: false, error: string}>} */
   async signUp({ firstName, lastName, email, countryCode, phone, password }) {
     const normalized = VB.Accounts.normalizeEmail(email);
+
+    if (VB.Accounts.distant()) {
+      try {
+        const uid = await VB.Remote.createAccount(normalized, password);
+        const profile = {
+          firstName: firstName.trim(),
+          lastName: lastName.trim().toUpperCase(),
+          countryCode,
+          phone: phone.trim(),
+          email: normalized,
+          createdAt: new Date().toISOString()
+        };
+        await VB.Remote.saveProfile(uid, profile);
+        await VB.Accounts._onAuthChanged({ uid, email: normalized });
+        return { ok: true, account: VB.Accounts._cache };
+      } catch (error) {
+        return { ok: false, error: VB.Remote.errorMessage(error, 'inscription') };
+      }
+    }
+
     if (VB.Accounts.all().some(a => a.email === normalized)) {
       return { ok: false, error: 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous plutôt.' };
     }
@@ -107,6 +169,16 @@ VB.Accounts = {
   },
 
   async signIn(email, password) {
+    if (VB.Accounts.distant()) {
+      try {
+        const uid = await VB.Remote.signIn(VB.Accounts.normalizeEmail(email), password);
+        await VB.Accounts._onAuthChanged({ uid, email: VB.Accounts.normalizeEmail(email) });
+        return { ok: true, account: VB.Accounts._cache };
+      } catch (error) {
+        return { ok: false, error: VB.Remote.errorMessage(error, 'connexion') };
+      }
+    }
+
     const account = VB.Accounts.all().find(a => a.email === VB.Accounts.normalizeEmail(email));
     // Message identique dans les deux cas : ne pas révéler si l'adresse existe.
     const genericError = { ok: false, error: 'Adresse e-mail ou mot de passe incorrect.' };
@@ -118,6 +190,15 @@ VB.Accounts = {
   },
 
   async changePassword(accountId, currentPassword, newPassword) {
+    if (VB.Accounts.distant()) {
+      try {
+        await VB.Remote.changePassword(currentPassword, newPassword);
+        return { ok: true };
+      } catch (error) {
+        return { ok: false, error: VB.Remote.errorMessage(error, 'motdepasse') };
+      }
+    }
+
     const accounts = VB.Accounts.all();
     const account = accounts.find(a => a.id === accountId);
     if (!account) return { ok: false, error: 'Compte introuvable.' };
@@ -136,19 +217,29 @@ VB.Accounts = {
   /* ---------- Session ---------- */
 
   currentId() {
+    if (VB.Accounts.distant()) return VB.Accounts._cache?.id ?? null;
     try { return localStorage.getItem(VB.SESSION_KEY); } catch (e) { return null; }
   },
 
   current() {
+    if (VB.Accounts.distant()) return VB.Accounts._cache;
     const id = VB.Accounts.currentId();
     return id ? VB.Accounts.findById(id) : null;
   },
 
+  /** En mode Firebase, la session est ouverte par `signIn`/`signUp` et
+      persistée par le SDK : il n'y a rien à écrire ici. */
   setSession(accountId) {
+    if (VB.Accounts.distant()) return;
     try { localStorage.setItem(VB.SESSION_KEY, accountId); } catch (e) { /* stockage indisponible */ }
   },
 
   clearSession() {
+    if (VB.Accounts.distant()) {
+      VB.Accounts._cache = null;
+      VB.Remote.signOut().catch(e => console.warn('[VB] Déconnexion :', e));
+      return;
+    }
     try { localStorage.removeItem(VB.SESSION_KEY); } catch (e) { /* stockage indisponible */ }
   }
 };
